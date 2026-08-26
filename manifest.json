@@ -1,5 +1,5 @@
 {
-  "name": "Bangalore Spend Tracker",
+  "name": "Spend Tracker",
   "short_name": "Spend Tracker",
   "description": "Daily spend tracker with category breakdown, forecast, and budgeting.",
   "start_url": "./index.html",
