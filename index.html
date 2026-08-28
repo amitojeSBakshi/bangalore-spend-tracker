@@ -305,11 +305,14 @@
 
     <!-- SIGN IN -->
     <div class="auth-view active" id="authSignIn">
-      <h2 id="signInTitle">Enter your passcode</h2>
-      <p>Your own passcode loads your own data, exactly where you left it.</p>
+      <h2 id="signInTitle">Enter your name and passcode</h2>
+      <p>Both together load your own data — this way two people can even share a passcode without it opening the wrong profile.</p>
       <form id="signInForm">
+        <div class="auth-field">
+          <input id="signInName" type="text" placeholder="Your name" autocomplete="off" required>
+        </div>
         <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="••••" autocomplete="off" required>
-        <div class="auth-error" id="signInError">That passcode isn't recognized. New here? Create a profile instead.</div>
+        <div class="auth-error" id="signInError">That name + passcode combo isn't recognized. New here? Create a profile instead.</div>
         <button type="submit" class="btn">Unlock</button>
       </form>
     </div>
@@ -343,6 +346,8 @@
         <button type="submit" class="btn">Unlock</button>
       </form>
     </div>
+
+    <button type="button" class="auth-link" id="backToDemoBtn">← Back to sample data</button>
 
     <div class="lock-hint">Heads up: this is a light profile lock for sharing the app around, not real security — anyone with device access to this browser could still find the data in it.</div>
   </div>
@@ -697,7 +702,7 @@ function setAuthTab(tab){
   document.getElementById('authConfirm').classList.remove('active');
   document.getElementById('signInError').classList.remove('show');
   document.getElementById('createError').classList.remove('show');
-  const focusId = tab==='signIn' ? 'pinInput' : 'createName';
+  const focusId = tab==='signIn' ? 'signInName' : 'createName';
   setTimeout(()=>{ const el = document.getElementById(focusId); if(el) el.focus(); }, 30);
 }
 ['pinInput','createPin','createPinConfirm','confirmPinInput'].forEach(id=>{
@@ -706,27 +711,42 @@ function setAuthTab(tab){
   });
 });
 function isValidPin(pin){ return /^\d{4}$/.test(pin); }
+function normName(name){ return name.trim().toLowerCase(); }
+// The passcode alone is NOT the lookup key — name + passcode together are.
+// That means two different people can safely pick the identical 4-digit
+// code (their name disambiguates them), and a random guesser needs to know
+// BOTH someone's exact name and their passcode, not just get lucky on 1-in-
+// 10,000 odds against a bare 4-digit code.
+function profileHash(name, pin){ return hashStr(normName(name) + '|' + pin).toString(16); }
 
 document.getElementById('toggleSignIn').addEventListener('click', ()=>setAuthTab('signIn'));
 document.getElementById('toggleCreate').addEventListener('click', ()=>setAuthTab('create'));
 document.getElementById('demoSignInBtn').addEventListener('click', openAuthModal);
+document.getElementById('backToDemoBtn').addEventListener('click', closeAuthModal);
+
+function closeAuthModal(){
+  pendingProfile = null;
+  document.getElementById('lockOverlay').style.display = 'none';
+  if(!currentProfile) document.getElementById('demoBanner').style.display = 'flex';
+}
 
 document.getElementById('signInForm').addEventListener('submit', (ev)=>{
   ev.preventDefault();
+  const name = document.getElementById('signInName').value.trim();
   const pin = document.getElementById('pinInput').value.trim();
   const errEl = document.getElementById('signInError');
-  if(!isValidPin(pin)){
-    errEl.textContent = 'Passcodes are 4 digits.';
+  errEl.textContent = "That name + passcode combo isn't recognized. New here? Create a profile instead.";
+  if(!name || !isValidPin(pin)){
+    errEl.textContent = 'Enter your name and a 4-digit passcode.';
     errEl.classList.add('show');
     return;
   }
-  errEl.textContent = "That passcode isn't recognized. New here? Create a profile instead.";
-  const hash = hashStr(pin).toString(16);
+  const hash = profileHash(name, pin);
   const profiles = getProfiles();
-  if(profiles[hash]){
+  if(profiles[hash] && normName(profiles[hash].name) === normName(name)){
     finalizeLogin(hash, profiles[hash].name);
   } else {
-    document.getElementById('signInError').classList.add('show');
+    errEl.classList.add('show');
   }
 });
 
@@ -740,9 +760,9 @@ document.getElementById('createForm').addEventListener('submit', (ev)=>{
   if(!name){ errEl.textContent = 'Enter your name.'; errEl.classList.add('show'); return; }
   if(!isValidPin(pin)){ errEl.textContent = 'Passcode must be exactly 4 digits.'; errEl.classList.add('show'); return; }
   if(pin !== pinConfirm){ errEl.textContent = "Passcodes don't match — try again."; errEl.classList.add('show'); return; }
-  const hash = hashStr(pin).toString(16);
+  const hash = profileHash(name, pin);
   const profiles = getProfiles();
-  if(profiles[hash]){ errEl.textContent = 'That passcode is already taken — choose another.'; errEl.classList.add('show'); return; }
+  if(profiles[hash]){ errEl.textContent = 'You already have a profile with this exact name and passcode — sign in instead, or pick a different passcode.'; errEl.classList.add('show'); return; }
   profiles[hash] = { name, createdAt: Date.now() };
   saveProfiles(profiles);
   pendingProfile = { hash, name };
@@ -757,7 +777,7 @@ document.getElementById('createForm').addEventListener('submit', (ev)=>{
 document.getElementById('confirmForm').addEventListener('submit', (ev)=>{
   ev.preventDefault();
   const pin = document.getElementById('confirmPinInput').value.trim();
-  if(pendingProfile && hashStr(pin).toString(16) === pendingProfile.hash){
+  if(pendingProfile && profileHash(pendingProfile.name, pin) === pendingProfile.hash){
     finalizeLogin(pendingProfile.hash, pendingProfile.name);
   } else {
     document.getElementById('confirmError').classList.add('show');
