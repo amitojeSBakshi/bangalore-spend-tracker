@@ -22,7 +22,8 @@
     --good:#2f9c63; --warn:#b9861f; --bad:#c94b3f;
     --good-bg:rgba(47,156,99,.12); --warn-bg:rgba(185,134,31,.12); --bad-bg:rgba(201,75,63,.12);
     --food:#d9613c; --transport:#3d78d8; --shopping:#8f5cc9; --fun:#c94a86;
-    --training:#2f9c63; --productive:#1f8f8a; --donation:#b98a1f; --misc:#7b8494;
+    --sports:#2f9c63; --productive:#1f8f8a; --donation:#b98a1f; --gift:#c9578f; --misc:#7b8494;
+    --extra1:#a3762f; --extra2:#3f8fa6; --extra3:#7a63c9; --extra4:#4f9e5c; --extra5:#b85a3f;
     --shadow: 0 1px 2px rgba(20,20,30,.06), 0 8px 24px -12px rgba(20,20,30,.12);
     --radius:12px;
   }
@@ -33,7 +34,8 @@
       --good:#3fae74; --warn:#d9a72c; --bad:#e0574a;
       --good-bg:rgba(63,174,116,.15); --warn-bg:rgba(217,167,44,.15); --bad-bg:rgba(224,87,74,.15);
       --food:#e8734f; --transport:#5b95ec; --shopping:#a374e0; --fun:#e0559c;
-      --training:#3fae74; --productive:#2fb0ad; --donation:#d9a72c; --misc:#8b93a3;
+      --sports:#3fae74; --productive:#2fb0ad; --donation:#d9a72c; --gift:#e577ab; --misc:#8b93a3;
+      --extra1:#d1a355; --extra2:#5fb8d1; --extra3:#a190e8; --extra4:#7cc98a; --extra5:#e0876a;
       --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 28px -12px rgba(0,0,0,.5);
     }
   }
@@ -43,7 +45,8 @@
     --good:#3fae74; --warn:#d9a72c; --bad:#e0574a;
     --good-bg:rgba(63,174,116,.15); --warn-bg:rgba(217,167,44,.15); --bad-bg:rgba(224,87,74,.15);
     --food:#e8734f; --transport:#5b95ec; --shopping:#a374e0; --fun:#e0559c;
-    --training:#3fae74; --productive:#2fb0ad; --donation:#d9a72c; --misc:#8b93a3;
+    --sports:#3fae74; --productive:#2fb0ad; --donation:#d9a72c; --gift:#e577ab; --misc:#8b93a3;
+    --extra1:#d1a355; --extra2:#5fb8d1; --extra3:#a190e8; --extra4:#7cc98a; --extra5:#e0876a;
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 28px -12px rgba(0,0,0,.5);
   }
 
@@ -200,9 +203,65 @@
     .cards{grid-template-columns:1fr;}
     .card.wide{grid-column:auto;}
   }
+
+  /* ---- Lock screen ---- */
+  #lockOverlay{
+    position:fixed; inset:0; background:var(--bg); z-index:100;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .lock-card{width:100%; max-width:340px; text-align:center;}
+  .lock-card .logo-mark{margin:0 auto 18px;}
+  .lock-card h2{font-family:"Fraunces", Georgia, serif; font-size:22px; margin:0 0 6px;}
+  .lock-card p{color:var(--muted); font-size:13px; margin:0 0 22px; line-height:1.5;}
+  #pinInput{
+    text-align:center; letter-spacing:.4em; font-size:22px; font-family:"IBM Plex Mono",monospace;
+    padding:14px 11px;
+  }
+  .lock-card .btn{width:100%; margin-top:14px;}
+  .lock-hint{font-size:11.5px; color:var(--muted); margin-top:16px; line-height:1.5;}
+  .lock-btn{
+    flex-shrink:0; background:var(--panel2); border:1px solid var(--border);
+    color:var(--muted); width:34px; height:34px; border-radius:9px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .lock-btn:hover{color:var(--text); border-color:var(--accent);}
+  .lock-btn svg{width:16px; height:16px;}
+  .header-actions{display:flex; gap:8px; margin-left:auto;}
+
+  /* ---- Plan tab ---- */
+  .salary-row{display:flex; align-items:flex-end; gap:12px; margin-bottom:6px;}
+  .salary-row > div{flex:1;}
+  .rule-cards{display:flex; flex-direction:column; gap:8px;}
+  .rule-card{
+    text-align:left; width:100%; background:var(--panel2); border:1px solid var(--border);
+    border-radius:10px; padding:12px 14px; cursor:pointer; font-family:inherit;
+  }
+  .rule-card:hover{border-color:var(--accent);}
+  .rule-card.selected{border-color:var(--accent); background:var(--good-bg);}
+  .rule-card .rn{font-weight:600; font-size:14px; display:flex; justify-content:space-between; gap:8px;}
+  .rule-card .rn span.split{color:var(--muted); font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:500;}
+  .rule-card .rb{color:var(--muted); font-size:12px; margin-top:4px; line-height:1.4;}
+  .plan-total{display:flex; justify-content:space-between; font-size:13px; padding-top:10px; margin-top:4px; border-top:1px solid var(--border); font-weight:600;}
 </style>
 </head>
 <body>
+
+<div id="lockOverlay">
+  <div class="lock-card">
+    <svg class="logo-mark" width="40" height="40" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <polygon points="47,4 59,25 33,60 10,29" fill="#5EEAE0" fill-opacity="0.85"/>
+      <rect x="15" y="15" width="27" height="27" transform="rotate(45 28.5 28.5)" fill="#2296F3" fill-opacity="0.92"/>
+      <rect x="5" y="30" width="21" height="21" transform="rotate(18 15.5 40.5)" fill="#1330D6"/>
+    </svg>
+    <h2>Enter your passcode</h2>
+    <p>Your own code loads your own data. A new code starts a fresh, separate profile — nothing gets mixed up or overwritten.</p>
+    <form id="lockForm">
+      <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" autocomplete="off" required>
+      <button type="submit" class="btn">Unlock</button>
+    </form>
+    <div class="lock-hint">Heads up: this is a light profile lock for sharing the app around, not real security — anyone with device access to this browser could still find the data in it.</div>
+  </div>
+</div>
 
 <div class="app">
   <header class="top">
@@ -213,12 +272,20 @@
         <rect x="5" y="30" width="21" height="21" transform="rotate(18 15.5 40.5)" fill="#1330D6"/>
       </svg>
       <h1>Spend Tracker</h1>
-      <button class="refresh-btn" id="refreshBtn" type="button" aria-label="Refresh app">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M21 12a9 9 0 1 1-3-6.7"/>
-          <path d="M21 3v6h-6"/>
-        </svg>
-      </button>
+      <div class="header-actions">
+        <button class="refresh-btn" id="refreshBtn" type="button" aria-label="Refresh app">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-3-6.7"/>
+            <path d="M21 3v6h-6"/>
+          </svg>
+        </button>
+        <button class="lock-btn" id="lockBtn" type="button" aria-label="Lock / switch profile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="4" y="11" width="16" height="10" rx="2"/>
+            <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+          </svg>
+        </button>
+      </div>
     </div>
     <div class="tag">Log it once. See where it goes.</div>
     <div id="dataStatus"></div>
@@ -229,6 +296,7 @@
     <button class="tab-btn" data-tab="add">Add Entry</button>
     <button class="tab-btn" data-tab="entries">Entries</button>
     <button class="tab-btn" data-tab="budget">Budget</button>
+    <button class="tab-btn" data-tab="plan">Plan</button>
   </nav>
 
   <main>
@@ -277,6 +345,10 @@
             <label for="fNote">Note (optional)</label>
             <input type="text" id="fNote" placeholder="e.g. lunch, bike petrol">
           </div>
+          <div class="full" id="customCategoryWrap" style="display:none;">
+            <label for="fCustomCategory">Custom category name</label>
+            <input type="text" id="fCustomCategory" placeholder="e.g. Vet bill, Wedding gift">
+          </div>
           <div class="full btn-row">
             <button type="submit" class="btn" id="submitBtn">Add spend</button>
             <button type="button" class="btn secondary" id="cancelEdit" style="display:none;">Cancel edit</button>
@@ -315,6 +387,30 @@
       </div>
     </div>
 
+    <!-- PLAN -->
+    <div class="view" id="tab-plan">
+      <div class="panel">
+        <h3>Your in-hand salary</h3>
+        <div class="salary-row">
+          <div>
+            <label for="fSalary">Monthly in-hand (₹)</label>
+            <input type="number" id="fSalary" min="0" step="500" placeholder="e.g. 60000" inputmode="numeric">
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Choose a planning method</h3>
+        <div class="rule-cards" id="ruleCards"></div>
+      </div>
+
+      <div class="panel" id="planResultPanel" style="display:none;">
+        <h3 id="planResultTitle">Your plan</h3>
+        <div id="planBars"></div>
+        <div class="plan-total" id="planTotal"></div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -350,22 +446,32 @@ document.getElementById('refreshBtn').addEventListener('click', async ()=>{
   location.reload();
 });
 
-const STORAGE_KEY = 'bglr-spend-tracker-v1';
+const STORAGE_PREFIX = 'bglr-spend-tracker-v1';
+let STORAGE_KEY = null; // set once a profile is unlocked
 
 const CATEGORIES = [
   {id:'Food', color:'var(--food)'},
   {id:'Transport', color:'var(--transport)'},
   {id:'Shopping', color:'var(--shopping)'},
   {id:'Fun', color:'var(--fun)'},
-  {id:'Training', color:'var(--training)'},
-  {id:'Donation/Gift', color:'var(--donation)'},
+  {id:'Sports', color:'var(--sports)'},
+  {id:'Donation', color:'var(--donation)'},
+  {id:'Gift', color:'var(--gift)'},
   {id:'Productive', color:'var(--productive)'},
   {id:'Misc', color:'var(--misc)'},
 ];
+const EXTRA_PALETTE = ['var(--extra1)','var(--extra2)','var(--extra3)','var(--extra4)','var(--extra5)'];
+
+function hashStr(s){
+  let h = 5381;
+  for(let i=0;i<s.length;i++){ h = ((h*33) ^ s.charCodeAt(i)) >>> 0; }
+  return h;
+}
 
 function catColor(id){
   const c = CATEGORIES.find(c=>c.id===id);
-  return c ? c.color : 'var(--misc)';
+  if(c) return c.color;
+  return EXTRA_PALETTE[hashStr(id) % EXTRA_PALETTE.length];
 }
 
 let foundSavedData = true;
@@ -374,14 +480,24 @@ let lastSaveFailed = false;
 function loadState(){
   let raw = null;
   try{ raw = localStorage.getItem(STORAGE_KEY); }catch(e){ raw = null; }
+  let s;
   if(raw){
-    try{ return JSON.parse(raw); }catch(e){}
+    try{ s = JSON.parse(raw); }catch(e){}
   }
-  // No readable data in this browser. Show an empty tracker WITHOUT
-  // persisting it — writing here would clobber real data if this read
-  // was merely a transient failure. Use Import backup to restore.
-  foundSavedData = false;
-  return { entries: [], budgets: {}, nextId: 1000 };
+  if(!s){
+    // No readable data for this profile yet. Show an empty tracker WITHOUT
+    // persisting it — writing here would clobber real data if this read
+    // was merely a transient failure. Use Import backup to restore.
+    foundSavedData = false;
+    s = { entries: [], budgets: {}, nextId: 1000 };
+  }
+  // One-time safe rename: "Training" was renamed to "Sports". This is an
+  // unambiguous 1:1 mapping, unlike the Donation/Gift split, which is left
+  // alone since there's no way to know which of the two an old entry meant.
+  let migrated = false;
+  s.entries.forEach(e=>{ if(e.category === 'Training'){ e.category = 'Sports'; migrated = true; } });
+  if(migrated) saveState(s);
+  return s;
 }
 function saveState(state){
   state.updatedAt = Date.now();
@@ -395,7 +511,34 @@ function saveState(state){
   renderDataStatus();
 }
 
-let state = loadState();
+let state = { entries: [], budgets: {}, nextId: 1000 };
+
+// ---------- Profile lock ----------
+function unlockProfile(pin){
+  STORAGE_KEY = STORAGE_PREFIX + '::' + hashStr(pin).toString(16);
+  try{ sessionStorage.setItem('activeProfilePin', pin); }catch(e){}
+  foundSavedData = true;
+  lastSaveFailed = false;
+  state = loadState();
+  document.getElementById('lockOverlay').style.display = 'none';
+  bootApp();
+}
+
+function lockApp(){
+  try{ sessionStorage.removeItem('activeProfilePin'); }catch(e){}
+  STORAGE_KEY = null;
+  document.getElementById('lockOverlay').style.display = 'flex';
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pinInput').focus();
+}
+
+document.getElementById('lockForm').addEventListener('submit', (ev)=>{
+  ev.preventDefault();
+  const pin = document.getElementById('pinInput').value.trim();
+  if(!pin) return;
+  unlockProfile(pin);
+});
+document.getElementById('lockBtn').addEventListener('click', lockApp);
 
 function renderDataStatus(){
   const el = document.getElementById('dataStatus');
@@ -446,16 +589,19 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     if(btn.dataset.tab==='entries') renderEntriesTab();
     if(btn.dataset.tab==='budget') renderBudgetTab();
     if(btn.dataset.tab==='overview') renderOverview();
+    if(btn.dataset.tab==='plan') renderPlanTab();
   });
 });
 
 // ---------- Category select population ----------
 function populateCategorySelects(){
   const fCat = document.getElementById('fCategory');
-  fCat.innerHTML = CATEGORIES.map(c=>`<option value="${c.id}">${c.id}</option>`).join('');
-  const filterCat = document.getElementById('filterCategory');
-  filterCat.innerHTML = '<option value="">All categories</option>' + CATEGORIES.map(c=>`<option value="${c.id}">${c.id}</option>`).join('');
+  fCat.innerHTML = CATEGORIES.map(c=>`<option value="${c.id}">${c.id}</option>`).join('')
+    + '<option value="__other__">Other (type your own)</option>';
 }
+document.getElementById('fCategory').addEventListener('change', (e)=>{
+  document.getElementById('customCategoryWrap').style.display = e.target.value === '__other__' ? 'block' : 'none';
+});
 populateCategorySelects();
 
 // ---------- Overview ----------
@@ -502,7 +648,9 @@ function renderOverview(){
   const byCat = {};
   entries.forEach(e=>{ byCat[e.category] = (byCat[e.category]||0) + e.amount; });
   const maxCat = Math.max(1, ...Object.values(byCat));
-  const catRows = CATEGORIES.filter(c=>byCat[c.id]).sort((a,b)=>byCat[b.id]-byCat[a.id]);
+  const catRows = Object.keys(byCat)
+    .map(id=>({id, color: catColor(id)}))
+    .sort((a,b)=>byCat[b.id]-byCat[a.id]);
   document.getElementById('categoryBars').innerHTML = catRows.length ? catRows.map(c=>`
     <div class="bar-row">
       <div class="name"><span class="dot" style="background:${c.color}"></span>${c.id}</div>
@@ -554,9 +702,11 @@ document.getElementById('entryForm').addEventListener('submit', (ev)=>{
   const editId = document.getElementById('editId').value;
   const date = document.getElementById('fDate').value;
   const amount = parseFloat(document.getElementById('fAmount').value);
-  const category = document.getElementById('fCategory').value;
+  const rawCategory = document.getElementById('fCategory').value;
+  const customCategory = document.getElementById('fCustomCategory').value.trim();
+  const category = rawCategory === '__other__' ? customCategory : rawCategory;
   const note = document.getElementById('fNote').value.trim();
-  if(!date || !amount || amount<=0) return;
+  if(!date || !amount || amount<=0 || !category) return;
 
   if(editId){
     const idx = state.entries.findIndex(e=>String(e.id)===String(editId));
@@ -571,6 +721,9 @@ document.getElementById('entryForm').addEventListener('submit', (ev)=>{
   saveState(state);
   document.getElementById('fAmount').value = '';
   document.getElementById('fNote').value = '';
+  document.getElementById('fCustomCategory').value = '';
+  document.getElementById('customCategoryWrap').style.display = 'none';
+  document.getElementById('fCategory').value = rawCategory === '__other__' ? 'Food' : rawCategory;
   document.getElementById('fAmount').focus();
   renderOverview();
 });
@@ -584,6 +737,8 @@ function exitEditMode(){
   document.getElementById('fDate').value = todayStr();
   document.getElementById('fAmount').value = '';
   document.getElementById('fNote').value = '';
+  document.getElementById('fCustomCategory').value = '';
+  document.getElementById('customCategoryWrap').style.display = 'none';
 }
 
 function editEntry(id){
@@ -592,7 +747,10 @@ function editEntry(id){
   document.getElementById('editId').value = e.id;
   document.getElementById('fDate').value = e.date;
   document.getElementById('fAmount').value = e.amount;
-  document.getElementById('fCategory').value = e.category;
+  const isFixed = CATEGORIES.some(c=>c.id===e.category);
+  document.getElementById('fCategory').value = isFixed ? e.category : '__other__';
+  document.getElementById('customCategoryWrap').style.display = isFixed ? 'none' : 'block';
+  document.getElementById('fCustomCategory').value = isFixed ? '' : e.category;
   document.getElementById('fNote').value = e.note || '';
   document.getElementById('addFormTitle').textContent = 'Edit spend';
   document.getElementById('submitBtn').textContent = 'Save changes';
@@ -619,6 +777,16 @@ function populateEntryMonthSelect(){
   sel.value = currentMonth;
 }
 
+function populateFilterCategory(){
+  const filterCat = document.getElementById('filterCategory');
+  const prev = filterCat.value;
+  const fixedIds = CATEGORIES.map(c=>c.id);
+  const customIds = Array.from(new Set(state.entries.map(e=>e.category))).filter(id=>!fixedIds.includes(id)).sort();
+  const all = [...fixedIds, ...customIds];
+  filterCat.innerHTML = '<option value="">All categories</option>' + all.map(id=>`<option value="${id}">${id}</option>`).join('');
+  if(all.includes(prev)) filterCat.value = prev;
+}
+
 document.getElementById('entryMonth').addEventListener('change', (e)=>{
   currentMonth = e.target.value; renderEntriesTab();
 });
@@ -626,6 +794,7 @@ document.getElementById('filterCategory').addEventListener('change', renderEntri
 
 function renderEntriesTab(){
   populateEntryMonthSelect();
+  populateFilterCategory();
   const catFilter = document.getElementById('filterCategory').value;
   let entries = entriesForMonth(currentMonth);
   if(catFilter) entries = entries.filter(e=>e.category===catFilter);
@@ -746,11 +915,92 @@ function setBudget(category, value){
   renderBudgetTab();
 }
 
+// ---------- Financial planning ----------
+const BUDGET_RULES = [
+  {id:'50-30-20', name:'50/30/20 Rule', split:'50·30·20', blurb:'The classic split: essentials, lifestyle spending, and savings.', buckets:[
+    {label:'Needs', pct:50},{label:'Wants', pct:30},{label:'Savings', pct:20}
+  ]},
+  {id:'70-20-10', name:'70/20/10 Rule', split:'70·20·10', blurb:'A simpler three-way split that leans more room for living costs.', buckets:[
+    {label:'Living Expenses', pct:70},{label:'Savings', pct:20},{label:'Giving / Debt Payoff', pct:10}
+  ]},
+  {id:'pay-yourself-first', name:'Pay Yourself First', split:'20·80', blurb:'Move savings off the top first, then spend the rest freely.', buckets:[
+    {label:'Savings (off the top)', pct:20},{label:'Everything Else', pct:80}
+  ]},
+  {id:'60-solution', name:'60% Solution', split:'60·10·10·10·10', blurb:'Cap committed costs at 60%, split the remainder four ways.', buckets:[
+    {label:'Committed Expenses', pct:60},{label:'Retirement', pct:10},{label:'Long-Term Savings', pct:10},{label:'Short-Term Savings', pct:10},{label:'Fun Money', pct:10}
+  ]},
+  {id:'50-15-5', name:'50/15/5 Rule', split:'50·15·5·30', blurb:'Fidelity’s guideline: essentials, retirement, short-term buffer, rest flexible.', buckets:[
+    {label:'Essential Expenses', pct:50},{label:'Retirement Savings', pct:15},{label:'Short-Term Savings', pct:5},{label:'Flexible Spending', pct:30}
+  ]},
+  {id:'40-30-20-10', name:'40/30/20/10 Rule', split:'40·30·20·10', blurb:'A stricter needs/wants split with dedicated giving built in.', buckets:[
+    {label:'Needs', pct:40},{label:'Wants', pct:30},{label:'Savings', pct:20},{label:'Giving', pct:10}
+  ]},
+];
+
+document.getElementById('fSalary').addEventListener('change', (e)=>{
+  state.salary = parseFloat(e.target.value) || 0;
+  saveState(state);
+  renderPlanTab();
+});
+
+function selectRule(ruleId){
+  state.selectedRuleId = ruleId;
+  saveState(state);
+  renderPlanTab();
+}
+
+function renderPlanTab(){
+  document.getElementById('fSalary').value = state.salary || '';
+
+  document.getElementById('ruleCards').innerHTML = BUDGET_RULES.map(r=>`
+    <button type="button" class="rule-card${state.selectedRuleId===r.id?' selected':''}" onclick="selectRule('${r.id}')">
+      <div class="rn"><span>${r.name}</span><span class="split">${r.split}</span></div>
+      <div class="rb">${r.blurb}</div>
+    </button>`).join('');
+
+  const rule = BUDGET_RULES.find(r=>r.id===state.selectedRuleId);
+  const salary = state.salary || 0;
+  const resultPanel = document.getElementById('planResultPanel');
+
+  if(!rule || salary<=0){
+    resultPanel.style.display = 'none';
+    return;
+  }
+  resultPanel.style.display = 'block';
+  document.getElementById('planResultTitle').textContent = `${rule.name} · monthly`;
+  const maxPct = Math.max(...rule.buckets.map(b=>b.pct));
+  document.getElementById('planBars').innerHTML = rule.buckets.map((b,i)=>{
+    const amt = salary * b.pct / 100;
+    const color = EXTRA_PALETTE[i % EXTRA_PALETTE.length];
+    return `
+    <div class="bar-row">
+      <div class="name"><span class="dot" style="background:${color}"></span>${b.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(b.pct/maxPct*100).toFixed(1)}%;background:${color}"></div></div>
+      <div class="bar-amt">${fmt(amt)}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('planTotal').innerHTML = `<span>In-hand salary</span><span>${fmt(salary)}</span>`;
+}
+
 // ---------- init ----------
-renderDataStatus();
-renderOverview();
-renderEntriesTab();
-renderBudgetTab();
+function bootApp(){
+  renderDataStatus();
+  populateFilterCategory();
+  renderOverview();
+  renderEntriesTab();
+  renderBudgetTab();
+  renderPlanTab();
+}
+
+(function tryResumeSession(){
+  let pin = null;
+  try{ pin = sessionStorage.getItem('activeProfilePin'); }catch(e){}
+  if(pin){
+    unlockProfile(pin);
+  } else {
+    document.getElementById('lockOverlay').style.display = 'flex';
+  }
+})();
 </script>
 </body>
 </html>
