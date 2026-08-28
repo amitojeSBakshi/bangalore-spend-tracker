@@ -252,6 +252,36 @@
   .link-list a:hover{text-decoration:underline;}
   .bracket-note{font-size:12px; color:var(--muted); margin-top:12px; line-height:1.5;}
 
+  .insight-card{background:var(--panel2); border-left:3px solid var(--accent); border-radius:8px; padding:10px 12px; margin-bottom:8px; font-size:13px; line-height:1.5;}
+  .insight-card:last-child{margin-bottom:0;}
+  .insight-card b{color:var(--accent);}
+  .cat-delta{font-size:11px; margin-left:6px; font-family:"IBM Plex Mono",monospace;}
+  .cat-delta.up{color:var(--bad);}
+  .cat-delta.down{color:var(--good);}
+
+  .heatmap-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
+  .heatmap-grid .hcell{aspect-ratio:1; border-radius:5px; background:var(--panel2); display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--muted); font-family:"IBM Plex Mono",monospace;}
+  .heatmap-legend{display:flex; align-items:center; gap:6px; margin-top:10px; font-size:11px; color:var(--muted);}
+  .heatmap-legend .sw{width:12px; height:12px; border-radius:3px;}
+
+  .tag-pill{display:inline-flex; align-items:center; font-size:10.5px; padding:2px 8px; border-radius:999px; background:var(--panel2); border:1px solid var(--border); color:var(--muted); margin-right:4px;}
+  .quick-adds{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;}
+  .quick-add-btn{
+    background:var(--panel2); border:1px solid var(--border); border-radius:999px; padding:8px 14px;
+    font-size:12.5px; color:var(--text); cursor:pointer; font-family:inherit;
+  }
+  .quick-add-btn:hover{border-color:var(--accent);}
+
+  .reminder-banner{background:var(--warn-bg); color:var(--warn); font-size:12.5px; padding:10px 12px; border-radius:8px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
+  .reminder-banner button{background:var(--warn); color:var(--bg); border:none; border-radius:7px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;}
+
+  .goal-item{margin-bottom:18px;}
+  .goal-item:last-child{margin-bottom:0;}
+  .goal-item .top{display:flex; justify-content:space-between; margin-bottom:7px; font-size:14px; font-weight:600;}
+  .goal-item .meta{display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:6px;}
+  .recurring-item{display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); font-size:13px;}
+  .recurring-item:last-child{border-bottom:none;}
+
   /* ---- Demo banner ---- */
   #demoBanner{
     display:none; background:var(--warn-bg); color:var(--warn); font-size:12.5px;
@@ -413,15 +443,33 @@
 
       <div class="cards" id="overviewCards"></div>
       <div class="saved-note" id="savedNote"></div>
+      <div id="reminderBanner"></div>
+
+      <div class="panel" id="insightsPanel" style="display:none;">
+        <h3>Insights</h3>
+        <div id="insightsList"></div>
+      </div>
 
       <div class="panel">
-        <h3>Category breakdown</h3>
+        <div class="row" style="justify-content:space-between; margin-bottom:14px;">
+          <h3 style="margin:0;">Category breakdown</h3>
+          <span class="lock-hint" style="margin:0;">vs last month</span>
+        </div>
         <div id="categoryBars"></div>
       </div>
 
       <div class="panel">
         <h3>Weekly breakdown</h3>
         <div id="weeklyTable"></div>
+      </div>
+
+      <div class="panel">
+        <h3>This month's activity</h3>
+        <div id="heatmap"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn secondary small" id="shareRecapBtn">Share this month's recap</button>
       </div>
     </div>
 
@@ -451,6 +499,29 @@
             <label for="fCustomCategory">Custom category name</label>
             <input type="text" id="fCustomCategory" placeholder="e.g. Vet bill, Wedding gift">
           </div>
+          <div class="full">
+            <label for="fTags">Tags (optional, comma separated)</label>
+            <input type="text" id="fTags" placeholder="e.g. Goa trip, work">
+          </div>
+          <div class="full">
+            <label class="row" style="gap:8px; cursor:pointer;">
+              <input type="checkbox" id="fSplitToggle" style="width:auto;">
+              <span>Split this expense with others</span>
+            </label>
+          </div>
+          <div class="full" id="splitWrap" style="display:none;">
+            <div class="row" style="gap:12px;">
+              <div style="flex:1;">
+                <label for="fSplitTotal">Total bill (₹)</label>
+                <input type="number" id="fSplitTotal" min="0" step="1" placeholder="e.g. 1200">
+              </div>
+              <div style="flex:1;">
+                <label for="fSplitCount">Split between (people)</label>
+                <input type="number" id="fSplitCount" min="2" step="1" placeholder="e.g. 3">
+              </div>
+            </div>
+            <div class="lock-hint" style="text-align:left; margin-top:8px;">Only your share counts toward your totals and budget — the amount above updates automatically.</div>
+          </div>
           <div class="full btn-row">
             <button type="submit" class="btn" id="submitBtn">Add spend</button>
             <button type="button" class="btn secondary" id="cancelEdit" style="display:none;">Cancel edit</button>
@@ -468,12 +539,17 @@
           <select id="filterCategory"></select>
         </div>
       </div>
+      <div class="full" style="margin-bottom:14px;">
+        <input type="text" id="searchNotes" placeholder="Search notes and tags…">
+      </div>
       <div id="entriesTable"></div>
       <div class="btn-row" style="margin-top:16px;">
-        <button class="btn secondary small" id="exportBtn">Export backup</button>
+        <button class="btn secondary small" id="exportBtn">Export backup (JSON)</button>
+        <button class="btn secondary small" id="exportCsvBtn">Export CSV</button>
         <button class="btn secondary small" id="importBtn">Import backup</button>
         <input type="file" id="importFile" accept="application/json" style="display:none;">
       </div>
+      <div class="saved-note" id="backupNudge" style="text-align:left; margin-top:10px;"></div>
     </div>
 
     <!-- BUDGET -->
@@ -933,15 +1009,29 @@ function renderOverview(){
   const byCat = {};
   entries.forEach(e=>{ byCat[e.category] = (byCat[e.category]||0) + e.amount; });
   const maxCat = Math.max(1, ...Object.values(byCat));
+  const prevMonthKey = shiftMonth(currentMonth,-1);
+  const prevEntries = entriesForMonth(prevMonthKey);
+  const prevByCat = {};
+  prevEntries.forEach(e=>{ prevByCat[e.category] = (prevByCat[e.category]||0) + e.amount; });
   const catRows = Object.keys(byCat)
     .map(id=>({id, color: catColor(id)}))
     .sort((a,b)=>byCat[b.id]-byCat[a.id]);
-  document.getElementById('categoryBars').innerHTML = catRows.length ? catRows.map(c=>`
+  document.getElementById('categoryBars').innerHTML = catRows.length ? catRows.map(c=>{
+    const prevAmt = prevByCat[c.id] || 0;
+    let delta = '';
+    if(prevAmt>0){
+      const pct = Math.round((byCat[c.id]-prevAmt)/prevAmt*100);
+      if(pct!==0) delta = `<span class="cat-delta ${pct>0?'up':'down'}">${pct>0?'↑':'↓'}${Math.abs(pct)}%</span>`;
+    } else if(byCat[c.id]>0 && prevEntries.length){
+      delta = '<span class="cat-delta up">new</span>';
+    }
+    return `
     <div class="bar-row">
-      <div class="name"><span class="dot" style="background:${c.color}"></span>${c.id}</div>
+      <div class="name"><span class="dot" style="background:${c.color}"></span>${c.id}${delta}</div>
       <div class="bar-track"><div class="bar-fill" style="width:${(byCat[c.id]/maxCat*100).toFixed(1)}%;background:${c.color}"></div></div>
       <div class="bar-amt">${fmt(byCat[c.id])}</div>
-    </div>`).join('') : '<div class="empty">No entries yet this month.</div>';
+    </div>`;
+  }).join('') : '<div class="empty">No entries yet this month.</div>';
 
   const weeks = {};
   entries.forEach(e=>{
@@ -963,6 +1053,101 @@ function renderOverview(){
   const savedNoteEl = document.getElementById('savedNote');
   if(savedNoteEl){
     savedNoteEl.textContent = state.updatedAt ? `Saved on this device · ${new Date(state.updatedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})}` : 'Not saved yet on this device';
+  }
+
+  renderInsights(entries, total, prevMonthKey);
+  renderHeatmap(entries, y, m);
+  renderReminderBanner();
+}
+
+function renderInsights(entries, total, prevMonthKey){
+  const panel = document.getElementById('insightsPanel');
+  if(!entries.length){ panel.style.display = 'none'; return; }
+  const insights = [];
+  const byCat = {};
+  entries.forEach(e=>{ byCat[e.category] = (byCat[e.category]||0) + e.amount; });
+  const topCat = Object.keys(byCat).sort((a,b)=>byCat[b]-byCat[a])[0];
+  const topPct = Math.round(byCat[topCat]/total*100);
+  insights.push(`<b>${topCat}</b> is your biggest category this month at <b>${topPct}%</b> of total spend (${fmt(byCat[topCat])}).`);
+
+  const prevEntries = entriesForMonth(prevMonthKey);
+  if(prevEntries.length){
+    const prevTotal = prevEntries.reduce((s,e)=>s+e.amount,0);
+    if(prevTotal>0){
+      const pct = Math.round((total-prevTotal)/prevTotal*100);
+      if(Math.abs(pct)>=1) insights.push(`You're at <b>${fmt(total)}</b> so far — ${pct>0?`${pct}% more`:`${Math.abs(pct)}% less`} than ${monthLabel(prevMonthKey)}'s ${fmt(prevTotal)}.`);
+    }
+  }
+
+  const biggest = [...entries].sort((a,b)=>b.amount-a.amount)[0];
+  if(biggest){
+    const label = biggest.note || biggest.category;
+    const dateStr = new Date(biggest.date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    insights.push(`Biggest single expense: <b>${fmt(biggest.amount)}</b> on ${label} (${dateStr}).`);
+  }
+
+  panel.style.display = 'block';
+  document.getElementById('insightsList').innerHTML = insights.map(t=>`<div class="insight-card">${t}</div>`).join('');
+}
+
+function renderHeatmap(entries, y, m){
+  const dim = daysInMonth(y,m);
+  const dailyTotals = {};
+  entries.forEach(e=>{ const day = parseInt(e.date.slice(8,10),10); dailyTotals[day] = (dailyTotals[day]||0) + e.amount; });
+  const maxDay = Math.max(1, ...Object.values(dailyTotals));
+  const firstDow = (new Date(y, m-1, 1).getDay()+6)%7;
+  let cells = '';
+  for(let i=0;i<firstDow;i++) cells += `<div class="hcell" style="background:transparent;"></div>`;
+  for(let d=1; d<=dim; d++){
+    const amt = dailyTotals[d] || 0;
+    const pct = amt>0 ? Math.max(15, Math.round(amt/maxDay*100)) : 0;
+    const bg = pct>0 ? `color-mix(in srgb, var(--accent) ${pct}%, var(--panel2))` : 'var(--panel2)';
+    cells += `<div class="hcell" style="background:${bg};" title="₹${Math.round(amt)}">${d}</div>`;
+  }
+  document.getElementById('heatmap').innerHTML = `<div class="heatmap-grid">${cells}</div>
+    <div class="heatmap-legend"><span class="sw" style="background:var(--panel2);"></span>none<span class="sw" style="background:color-mix(in srgb, var(--accent) 50%, var(--panel2)); margin-left:8px;"></span>some<span class="sw" style="background:var(--accent); margin-left:8px;"></span>most</div>`;
+}
+
+document.getElementById('shareRecapBtn').addEventListener('click', ()=>{
+  const entries = entriesForMonth(currentMonth);
+  const total = entries.reduce((s,e)=>s+e.amount,0);
+  const byCat = {};
+  entries.forEach(e=>{ byCat[e.category] = (byCat[e.category]||0) + e.amount; });
+  const topCats = Object.keys(byCat).sort((a,b)=>byCat[b]-byCat[a]).slice(0,6);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 800; canvas.height = 1000;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#12141a'; ctx.fillRect(0,0,800,1000);
+  ctx.fillStyle = '#e8a33d'; ctx.font = '26px Georgia'; ctx.fillText(monthLabel(currentMonth).toUpperCase(), 60, 90);
+  ctx.fillStyle = '#eceef2'; ctx.font = 'bold 68px Georgia'; ctx.fillText(fmt(total), 60, 180);
+  ctx.fillStyle = '#9096a3'; ctx.font = '20px Georgia'; ctx.fillText(`${entries.length} entries logged`, 60, 218);
+  ctx.strokeStyle = '#2c303c'; ctx.beginPath(); ctx.moveTo(60,250); ctx.lineTo(740,250); ctx.stroke();
+  let y = 300;
+  topCats.forEach(cat=>{
+    ctx.fillStyle = '#eceef2'; ctx.font = '24px Georgia'; ctx.textAlign = 'left'; ctx.fillText(cat, 60, y);
+    ctx.fillStyle = '#e8a33d'; ctx.font = 'bold 24px "IBM Plex Mono", monospace'; ctx.textAlign = 'right'; ctx.fillText(fmt(byCat[cat]), 740, y);
+    y += 48;
+  });
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#6b7280'; ctx.font = '16px "IBM Plex Mono", monospace'; ctx.fillText('SPEND TRACKER', 60, 950);
+
+  const a = document.createElement('a');
+  a.download = `spend-recap-${currentMonth}.png`;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+});
+
+function renderReminderBanner(){
+  const el = document.getElementById('reminderBanner');
+  if(!currentProfile || currentMonth !== todayStr().slice(0,7)){ el.innerHTML = ''; return; }
+  const today = todayStr();
+  const hasToday = state.entries.some(e=>e.date===today);
+  const hour = new Date().getHours();
+  if(!hasToday && hour>=18){
+    el.innerHTML = `<div class="reminder-banner"><span>Haven't logged anything today yet.</span><button type="button" onclick="document.querySelector('[data-tab=add]').click()">Log now</button></div>`;
+  } else {
+    el.innerHTML = '';
   }
 }
 
@@ -992,27 +1177,55 @@ document.getElementById('entryForm').addEventListener('submit', (ev)=>{
   const customCategory = document.getElementById('fCustomCategory').value.trim();
   const category = rawCategory === '__other__' ? customCategory : rawCategory;
   const note = document.getElementById('fNote').value.trim();
+  const tags = document.getElementById('fTags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  const isSplit = document.getElementById('fSplitToggle').checked;
+  const splitTotal = isSplit ? parseFloat(document.getElementById('fSplitTotal').value) : null;
+  const splitCount = isSplit ? parseInt(document.getElementById('fSplitCount').value, 10) : null;
   if(!date || !amount || amount<=0 || !category) return;
+
+  const extra = {
+    tags,
+    splitTotal: (isSplit && splitTotal>0) ? splitTotal : null,
+    splitCount: (isSplit && splitCount>=2) ? splitCount : null,
+  };
 
   if(editId){
     const idx = state.entries.findIndex(e=>String(e.id)===String(editId));
-    if(idx>-1) state.entries[idx] = {...state.entries[idx], date, amount, category, note};
+    if(idx>-1) state.entries[idx] = {...state.entries[idx], date, amount, category, note, ...extra};
     document.getElementById('lastAdded').textContent = `Updated: ${fmt(amount)} · ${category} · ${date}`;
     exitEditMode();
   } else {
     const id = state.nextId++;
-    state.entries.push({id, date, amount, category, note});
+    state.entries.push({id, date, amount, category, note, ...extra});
     document.getElementById('lastAdded').textContent = `Added: ${fmt(amount)} · ${category} · ${date}`;
   }
   saveState(state);
   document.getElementById('fAmount').value = '';
   document.getElementById('fNote').value = '';
+  document.getElementById('fTags').value = '';
+  document.getElementById('fSplitToggle').checked = false;
+  document.getElementById('fSplitTotal').value = '';
+  document.getElementById('fSplitCount').value = '';
+  document.getElementById('splitWrap').style.display = 'none';
   document.getElementById('fCustomCategory').value = '';
   document.getElementById('customCategoryWrap').style.display = 'none';
   document.getElementById('fCategory').value = rawCategory === '__other__' ? 'Food' : rawCategory;
   document.getElementById('fAmount').focus();
   renderOverview();
 });
+
+document.getElementById('fSplitToggle').addEventListener('change', (e)=>{
+  document.getElementById('splitWrap').style.display = e.target.checked ? 'block' : 'none';
+});
+function recomputeSplitAmount(){
+  const total = parseFloat(document.getElementById('fSplitTotal').value);
+  const count = parseInt(document.getElementById('fSplitCount').value, 10);
+  if(total>0 && count>=2){
+    document.getElementById('fAmount').value = (Math.round((total/count)*100)/100);
+  }
+}
+document.getElementById('fSplitTotal').addEventListener('input', recomputeSplitAmount);
+document.getElementById('fSplitCount').addEventListener('input', recomputeSplitAmount);
 
 document.getElementById('cancelEdit').addEventListener('click', exitEditMode);
 function exitEditMode(){
@@ -1023,6 +1236,11 @@ function exitEditMode(){
   document.getElementById('fDate').value = todayStr();
   document.getElementById('fAmount').value = '';
   document.getElementById('fNote').value = '';
+  document.getElementById('fTags').value = '';
+  document.getElementById('fSplitToggle').checked = false;
+  document.getElementById('fSplitTotal').value = '';
+  document.getElementById('fSplitCount').value = '';
+  document.getElementById('splitWrap').style.display = 'none';
   document.getElementById('fCustomCategory').value = '';
   document.getElementById('customCategoryWrap').style.display = 'none';
 }
@@ -1038,6 +1256,12 @@ function editEntry(id){
   document.getElementById('customCategoryWrap').style.display = isFixed ? 'none' : 'block';
   document.getElementById('fCustomCategory').value = isFixed ? '' : e.category;
   document.getElementById('fNote').value = e.note || '';
+  document.getElementById('fTags').value = (e.tags||[]).join(', ');
+  const hasSplit = !!(e.splitTotal && e.splitCount);
+  document.getElementById('fSplitToggle').checked = hasSplit;
+  document.getElementById('splitWrap').style.display = hasSplit ? 'block' : 'none';
+  document.getElementById('fSplitTotal').value = hasSplit ? e.splitTotal : '';
+  document.getElementById('fSplitCount').value = hasSplit ? e.splitCount : '';
   document.getElementById('addFormTitle').textContent = 'Edit spend';
   document.getElementById('submitBtn').textContent = 'Save changes';
   document.getElementById('cancelEdit').style.display = 'inline-block';
@@ -1078,16 +1302,23 @@ document.getElementById('entryMonth').addEventListener('change', (e)=>{
   currentMonth = e.target.value; renderEntriesTab();
 });
 document.getElementById('filterCategory').addEventListener('change', renderEntriesTab);
+document.getElementById('searchNotes').addEventListener('input', renderEntriesTab);
 
 function renderEntriesTab(){
   populateEntryMonthSelect();
   populateFilterCategory();
   const catFilter = document.getElementById('filterCategory').value;
+  const search = document.getElementById('searchNotes').value.trim().toLowerCase();
   let entries = entriesForMonth(currentMonth);
   if(catFilter) entries = entries.filter(e=>e.category===catFilter);
+  if(search) entries = entries.filter(e=>
+    (e.note||'').toLowerCase().includes(search) ||
+    (e.tags||[]).some(t=>t.toLowerCase().includes(search))
+  );
 
   if(!entries.length){
     document.getElementById('entriesTable').innerHTML = '<div class="empty">No entries for this month/filter.</div>';
+    renderBackupNudge();
     return;
   }
 
@@ -1102,7 +1333,9 @@ function renderEntriesTab(){
     const dLabel = new Date(date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short', day:'numeric', month:'short'});
     html += `<div class="day-group"><div class="day-head"><span class="d">${dLabel}</span><span class="t">${fmt(dayTotal)}</span></div>`;
     rows.forEach(r=>{
-      html += `<div class="entry-row">
+      const tagsHtml = (r.tags||[]).map(t=>`<span class="tag-pill">${t}</span>`).join('');
+      const splitHtml = (r.splitTotal && r.splitCount) ? `<span class="tag-pill">split ${fmt(r.splitTotal)} ÷ ${r.splitCount}</span>` : '';
+      html += `<div class="entry-row" style="flex-wrap:wrap;">
         <span class="cat-pill"><span class="dot" style="background:${catColor(r.category)}"></span>${r.category}</span>
         <span class="note">${r.note||''}</span>
         <span class="amt">${fmt(r.amount)}</span>
@@ -1110,23 +1343,61 @@ function renderEntriesTab(){
           <button class="icon-btn" onclick="editEntry(${r.id})" title="Edit" aria-label="Edit entry">✎</button>
           <button class="icon-btn" onclick="deleteEntry(${r.id})" title="Delete" aria-label="Delete entry">✕</button>
         </span>
+        ${(tagsHtml||splitHtml) ? `<span style="width:100%; margin-top:2px;">${tagsHtml}${splitHtml}</span>` : ''}
       </div>`;
     });
     html += `</div>`;
   });
   document.getElementById('entriesTable').innerHTML = html;
+  renderBackupNudge();
+}
+
+function renderBackupNudge(){
+  const el = document.getElementById('backupNudge');
+  if(!currentProfile || !state.entries.length){ el.textContent = ''; return; }
+  const last = state.lastExportedAt;
+  const days = last ? Math.floor((Date.now()-last)/86400000) : null;
+  if(!last){
+    el.textContent = "You haven't backed up yet — consider Export backup so your data survives a lost/reset device.";
+  } else if(days>=14){
+    el.textContent = `Last backup was ${days} days ago — worth exporting a fresh copy.`;
+  } else {
+    el.textContent = '';
+  }
 }
 
 // ---------- Export / Import ----------
-document.getElementById('exportBtn').addEventListener('click', async ()=>{
-  const json = JSON.stringify(state, null, 2);
-  const filename = `spend-tracker-backup-${todayStr()}.json`;
-  const blob = new Blob([json], {type:'application/json'});
+function downloadBlob(content, filename, mime){
+  const blob = new Blob([content], {type:mime});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
+}
+
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const json = JSON.stringify(state, null, 2);
+  downloadBlob(json, `spend-tracker-backup-${todayStr()}.json`, 'application/json');
+  if(currentProfile){
+    state.lastExportedAt = Date.now();
+    saveState(state);
+    renderBackupNudge();
+  }
+});
+
+document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
+  const rows = [['Date','Category','Amount','Note','Tags']];
+  [...state.entries].sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
+    rows.push([e.date, e.category, e.amount, e.note||'', (e.tags||[]).join('; ')]);
+  });
+  const csv = rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  downloadBlob(csv, `spend-tracker-${todayStr()}.csv`, 'text/csv');
+  if(currentProfile){
+    state.lastExportedAt = Date.now();
+    saveState(state);
+    renderBackupNudge();
+  }
 });
 document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('importFile').click());
 document.getElementById('importFile').addEventListener('change', (e)=>{
