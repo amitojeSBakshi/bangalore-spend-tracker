@@ -254,7 +254,9 @@
 
   /* ---- Demo banner ---- */
   #demoBanner{
-    display:none; background:var(--warn-bg); color:var(--warn); font-size:12.5px; padding:10px 20px;
+    display:none; background:var(--warn-bg); color:var(--warn); font-size:12.5px;
+    padding-top:max(10px, calc(env(safe-area-inset-top) + 8px));
+    padding-left:20px; padding-right:20px; padding-bottom:10px;
     align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
   }
   #demoBanner button{
@@ -306,7 +308,7 @@
       <h2 id="signInTitle">Enter your passcode</h2>
       <p>Your own passcode loads your own data, exactly where you left it.</p>
       <form id="signInForm">
-        <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" autocomplete="off" required>
+        <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="••••" autocomplete="off" required>
         <div class="auth-error" id="signInError">That passcode isn't recognized. New here? Create a profile instead.</div>
         <button type="submit" class="btn">Unlock</button>
       </form>
@@ -321,10 +323,10 @@
           <input id="createName" type="text" placeholder="Your name" autocomplete="off" required>
         </div>
         <div class="auth-field">
-          <input id="createPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="Choose a passcode" autocomplete="off" required>
+          <input id="createPin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="Choose a 4-digit passcode" autocomplete="off" required>
         </div>
         <div class="auth-field">
-          <input id="createPinConfirm" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="Confirm passcode" autocomplete="off" required>
+          <input id="createPinConfirm" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="Confirm passcode" autocomplete="off" required>
         </div>
         <div class="auth-error" id="createError"></div>
         <button type="submit" class="btn">Create profile</button>
@@ -336,7 +338,7 @@
       <h2>Profile created</h2>
       <p id="confirmText">Enter the passcode you just set to continue.</p>
       <form id="confirmForm">
-        <input id="confirmPinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" autocomplete="off" required>
+        <input id="confirmPinInput" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="••••" autocomplete="off" required>
         <div class="auth-error" id="confirmError">That doesn't match. Try again.</div>
         <button type="submit" class="btn">Unlock</button>
       </form>
@@ -698,6 +700,13 @@ function setAuthTab(tab){
   const focusId = tab==='signIn' ? 'pinInput' : 'createName';
   setTimeout(()=>{ const el = document.getElementById(focusId); if(el) el.focus(); }, 30);
 }
+['pinInput','createPin','createPinConfirm','confirmPinInput'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', (e)=>{
+    e.target.value = e.target.value.replace(/\D/g,'').slice(0,4);
+  });
+});
+function isValidPin(pin){ return /^\d{4}$/.test(pin); }
+
 document.getElementById('toggleSignIn').addEventListener('click', ()=>setAuthTab('signIn'));
 document.getElementById('toggleCreate').addEventListener('click', ()=>setAuthTab('create'));
 document.getElementById('demoSignInBtn').addEventListener('click', openAuthModal);
@@ -705,7 +714,13 @@ document.getElementById('demoSignInBtn').addEventListener('click', openAuthModal
 document.getElementById('signInForm').addEventListener('submit', (ev)=>{
   ev.preventDefault();
   const pin = document.getElementById('pinInput').value.trim();
-  if(!pin) return;
+  const errEl = document.getElementById('signInError');
+  if(!isValidPin(pin)){
+    errEl.textContent = 'Passcodes are 4 digits.';
+    errEl.classList.add('show');
+    return;
+  }
+  errEl.textContent = "That passcode isn't recognized. New here? Create a profile instead.";
   const hash = hashStr(pin).toString(16);
   const profiles = getProfiles();
   if(profiles[hash]){
@@ -722,7 +737,8 @@ document.getElementById('createForm').addEventListener('submit', (ev)=>{
   const pinConfirm = document.getElementById('createPinConfirm').value.trim();
   const errEl = document.getElementById('createError');
   errEl.classList.remove('show');
-  if(!name || !pin){ errEl.textContent = 'Enter your name and a passcode.'; errEl.classList.add('show'); return; }
+  if(!name){ errEl.textContent = 'Enter your name.'; errEl.classList.add('show'); return; }
+  if(!isValidPin(pin)){ errEl.textContent = 'Passcode must be exactly 4 digits.'; errEl.classList.add('show'); return; }
   if(pin !== pinConfirm){ errEl.textContent = "Passcodes don't match — try again."; errEl.classList.add('show'); return; }
   const hash = hashStr(pin).toString(16);
   const profiles = getProfiles();
