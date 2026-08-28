@@ -475,6 +475,7 @@
 
     <!-- ADD ENTRY -->
     <div class="view" id="tab-add">
+      <div id="quickAdds"></div>
       <div class="panel">
         <h3 id="addFormTitle">Add a spend</h3>
         <form class="entry-form" id="entryForm">
@@ -562,6 +563,19 @@
       <div class="panel">
         <h3>Monthly budget by category</h3>
         <div id="budgetList"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Recurring monthly expenses</h3>
+        <div id="recurringList"></div>
+        <form id="recurringForm" class="entry-form" style="margin-top:14px;">
+          <div><label for="rLabel">Label</label><input id="rLabel" type="text" placeholder="e.g. Rent" required></div>
+          <div><label for="rAmount">Amount (₹)</label><input id="rAmount" type="number" min="0" step="1" required></div>
+          <div><label for="rCategory">Category</label><select id="rCategory"></select></div>
+          <div><label for="rDay">Day of month</label><input id="rDay" type="number" min="1" max="28" placeholder="1–28" required></div>
+          <div class="full"><button type="submit" class="btn secondary">Add recurring</button></div>
+        </form>
+        <div class="lock-hint" style="text-align:left; margin-top:12px;">Auto-added as a real entry once its day of month arrives — edit or delete it afterward like any other entry.</div>
       </div>
     </div>
 
@@ -948,9 +962,10 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     btn.classList.add('active');
     document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
     if(btn.dataset.tab==='entries') renderEntriesTab();
-    if(btn.dataset.tab==='budget') renderBudgetTab();
+    if(btn.dataset.tab==='budget'){ renderBudgetTab(); renderRecurringList(); }
     if(btn.dataset.tab==='overview') renderOverview();
     if(btn.dataset.tab==='plan') renderPlanTab();
+    if(btn.dataset.tab==='add') renderQuickAdds();
   });
 });
 
@@ -1475,6 +1490,101 @@ function setBudget(category, value){
   renderBudgetTab();
 }
 
+// ---------- Quick-add shortcuts ----------
+let quickAddData = [];
+function renderQuickAdds(){
+  const el = document.getElementById('quickAdds');
+  if(!currentProfile){ el.innerHTML = ''; return; }
+  const combos = {};
+  state.entries.forEach(e=>{
+    if(!e.note) return;
+    const key = e.category + '|' + e.note;
+    if(!combos[key]) combos[key] = { count:0, category:e.category, note:e.note, amount:e.amount, date:e.date };
+    combos[key].count++;
+    if(e.date >= combos[key].date){ combos[key].amount = e.amount; combos[key].date = e.date; }
+  });
+  quickAddData = Object.values(combos).filter(c=>c.count>=2).sort((a,b)=>b.count-a.count).slice(0,5);
+  if(!quickAddData.length){ el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="quick-adds">' + quickAddData.map((t,i)=>
+    `<button type="button" class="quick-add-btn" onclick="quickAdd(${i})">${t.note} · ${fmt(t.amount)}</button>`
+  ).join('') + '</div>';
+}
+function quickAdd(i){
+  if(!requireProfile()) return;
+  const t = quickAddData[i];
+  if(!t) return;
+  const id = state.nextId++;
+  const date = todayStr();
+  state.entries.push({id, date, amount:t.amount, category:t.category, note:t.note});
+  saveState(state);
+  document.getElementById('lastAdded').textContent = `Added: ${fmt(t.amount)} · ${t.category} · ${date}`;
+  renderOverview();
+  renderQuickAdds();
+}
+
+// ---------- Recurring monthly expenses ----------
+function populateRecurringCategorySelect(){
+  document.getElementById('rCategory').innerHTML = CATEGORIES.map(c=>`<option value="${c.id}">${c.id}</option>`).join('');
+}
+populateRecurringCategorySelect();
+
+document.getElementById('recurringForm').addEventListener('submit', (ev)=>{
+  ev.preventDefault();
+  if(!requireProfile()) return;
+  const label = document.getElementById('rLabel').value.trim();
+  const amount = parseFloat(document.getElementById('rAmount').value);
+  const category = document.getElementById('rCategory').value;
+  const dayOfMonth = parseInt(document.getElementById('rDay').value, 10);
+  if(!label || !amount || amount<=0 || !dayOfMonth || dayOfMonth<1 || dayOfMonth>28) return;
+  if(!state.recurring) state.recurring = [];
+  state.recurring.push({ id: state.nextId++, label, amount, category, dayOfMonth });
+  saveState(state);
+  document.getElementById('recurringForm').reset();
+  renderRecurringList();
+});
+
+function deleteRecurring(id){
+  if(!requireProfile()) return;
+  if(!confirm('Remove this recurring expense? Entries already added stay untouched.')) return;
+  state.recurring = (state.recurring||[]).filter(r=>r.id!==id);
+  saveState(state);
+  renderRecurringList();
+}
+
+function renderRecurringList(){
+  const list = state.recurring || [];
+  document.getElementById('recurringList').innerHTML = list.length ? list.map(r=>`
+    <div class="recurring-item">
+      <span>${r.label} · ${r.category} · day ${r.dayOfMonth}</span>
+      <span class="row" style="gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace;">${fmt(r.amount)}</span>
+        <button class="icon-btn" onclick="deleteRecurring(${r.id})" title="Delete" aria-label="Delete recurring expense">✕</button>
+      </span>
+    </div>`).join('') : '<div class="empty">No recurring expenses set up.</div>';
+}
+
+function applyRecurringEntries(){
+  if(!state.recurring || !state.recurring.length) return;
+  const today = new Date();
+  const monthKey = todayStr().slice(0,7);
+  const todayDay = today.getDate();
+  if(!state.recurringApplied) state.recurringApplied = {};
+  if(!state.recurringApplied[monthKey]) state.recurringApplied[monthKey] = [];
+  let changed = false;
+  state.recurring.forEach(r=>{
+    if(r.dayOfMonth <= todayDay && !state.recurringApplied[monthKey].includes(r.id)){
+      const dim = daysInMonth(today.getFullYear(), today.getMonth()+1);
+      const day = Math.min(r.dayOfMonth, dim);
+      const date = `${monthKey}-${String(day).padStart(2,'0')}`;
+      const id = state.nextId++;
+      state.entries.push({ id, date, amount:r.amount, category:r.category, note:r.label, tags:['recurring'] });
+      state.recurringApplied[monthKey].push(r.id);
+      changed = true;
+    }
+  });
+  if(changed) saveState(state);
+}
+
 // ---------- Financial planning ----------
 // Educational guidance, not personalized financial advice. Splits scale with
 // income based on commonly cited Indian personal-finance guidelines: needs
@@ -1634,12 +1744,15 @@ function renderPlanTab(){
 
 // ---------- init ----------
 function bootApp(){
+  applyRecurringEntries();
   renderDataStatus();
   populateFilterCategory();
   renderOverview();
   renderEntriesTab();
   renderBudgetTab();
+  renderRecurringList();
   renderPlanTab();
+  renderQuickAdds();
 }
 
 (function tryResumeSession(){
