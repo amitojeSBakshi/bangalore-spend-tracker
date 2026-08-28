@@ -485,6 +485,21 @@ function loadState(){
     try{ s = JSON.parse(raw); }catch(e){}
   }
   if(!s){
+    // First unlock ever since profile locks were added: adopt whatever was
+    // saved under the old, un-profiled key (once, for the first PIN only —
+    // later new PINs must NOT also inherit it, or profile isolation breaks).
+    let already = null;
+    try{ already = localStorage.getItem(STORAGE_PREFIX + '::migrated'); }catch(e){}
+    if(!already){
+      let oldRaw = null;
+      try{ oldRaw = localStorage.getItem(STORAGE_PREFIX); }catch(e){}
+      if(oldRaw){
+        try{ s = JSON.parse(oldRaw); }catch(e){}
+      }
+      try{ localStorage.setItem(STORAGE_PREFIX + '::migrated', '1'); }catch(e){}
+    }
+  }
+  if(!s){
     // No readable data for this profile yet. Show an empty tracker WITHOUT
     // persisting it — writing here would clobber real data if this read
     // was merely a transient failure. Use Import backup to restore.
