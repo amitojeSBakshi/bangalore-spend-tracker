@@ -242,6 +242,48 @@
   .rule-card .rn span.split{color:var(--muted); font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:500;}
   .rule-card .rb{color:var(--muted); font-size:12px; margin-top:4px; line-height:1.4;}
   .plan-total{display:flex; justify-content:space-between; font-size:13px; padding-top:10px; margin-top:4px; border-top:1px solid var(--border); font-weight:600;}
+  .tip-list{list-style:none; margin:16px 0 0; padding:0; display:flex; flex-direction:column; gap:10px;}
+  .tip-list li{font-size:13px; line-height:1.5; padding-left:18px; position:relative;}
+  .tip-list li::before{content:'→'; position:absolute; left:0; color:var(--accent);}
+  .link-list{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
+  .link-list a{
+    font-size:12.5px; color:var(--accent); text-decoration:none; display:flex; align-items:center; gap:6px;
+  }
+  .link-list a:hover{text-decoration:underline;}
+  .bracket-note{font-size:12px; color:var(--muted); margin-top:12px; line-height:1.5;}
+
+  /* ---- Demo banner ---- */
+  #demoBanner{
+    display:none; background:var(--warn-bg); color:var(--warn); font-size:12.5px; padding:10px 20px;
+    align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  }
+  #demoBanner button{
+    background:var(--warn); color:var(--bg); border:none; border-radius:7px; padding:7px 13px;
+    font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; flex-shrink:0;
+  }
+
+  /* ---- Auth modal (create profile / sign in) ---- */
+  .auth-toggle{display:flex; gap:6px; background:var(--panel2); border:1px solid var(--border); border-radius:10px; padding:3px; margin-bottom:20px;}
+  .auth-toggle button{
+    flex:1; background:none; border:none; border-radius:8px; padding:8px; font-size:12.5px; font-weight:600;
+    color:var(--muted); cursor:pointer; font-family:inherit;
+  }
+  .auth-toggle button.active{background:var(--panel); color:var(--text); box-shadow:var(--shadow);}
+  .auth-view{display:none;}
+  .auth-view.active{display:block;}
+  .auth-field{margin-bottom:12px; text-align:left;}
+  .auth-error{color:var(--bad); font-size:12px; margin:-6px 0 12px; text-align:left; display:none;}
+  .auth-error.show{display:block;}
+  .auth-link{background:none; border:none; color:var(--accent); font-size:12.5px; cursor:pointer; font-family:inherit; margin-top:14px;}
+
+  /* ---- Greeting screen (time-of-day warmth) ---- */
+  #greetOverlay{
+    position:fixed; inset:0; z-index:110; display:none; align-items:center; justify-content:center;
+    background:linear-gradient(180deg,#2a2116,#12141a); color:#f1e6d3; text-align:center; padding:24px;
+  }
+  #greetOverlay .gtime{font-family:"IBM Plex Mono",monospace; font-size:12px; color:#d1a355; letter-spacing:.05em; margin-bottom:14px;}
+  #greetOverlay h2{font-family:"Fraunces",serif; font-size:28px; font-weight:600; margin:0 0 10px;}
+  #greetOverlay p{font-size:13px; color:#c9b896; max-width:260px; margin:0 auto;}
 </style>
 </head>
 <body>
@@ -253,17 +295,70 @@
       <rect x="15" y="15" width="27" height="27" transform="rotate(45 28.5 28.5)" fill="#2296F3" fill-opacity="0.92"/>
       <rect x="5" y="30" width="21" height="21" transform="rotate(18 15.5 40.5)" fill="#1330D6"/>
     </svg>
-    <h2>Enter your passcode</h2>
-    <p>Your own code loads your own data. A new code starts a fresh, separate profile — nothing gets mixed up or overwritten.</p>
-    <form id="lockForm">
-      <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" autocomplete="off" required>
-      <button type="submit" class="btn">Unlock</button>
-    </form>
+
+    <div class="auth-toggle">
+      <button type="button" id="toggleSignIn" class="active">I have a passcode</button>
+      <button type="button" id="toggleCreate">Create profile</button>
+    </div>
+
+    <!-- SIGN IN -->
+    <div class="auth-view active" id="authSignIn">
+      <h2 id="signInTitle">Enter your passcode</h2>
+      <p>Your own passcode loads your own data, exactly where you left it.</p>
+      <form id="signInForm">
+        <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" autocomplete="off" required>
+        <div class="auth-error" id="signInError">That passcode isn't recognized. New here? Create a profile instead.</div>
+        <button type="submit" class="btn">Unlock</button>
+      </form>
+    </div>
+
+    <!-- CREATE PROFILE -->
+    <div class="auth-view" id="authCreate">
+      <h2>Create your profile</h2>
+      <p>Your own name and passcode, kept separate from anyone else using this app.</p>
+      <form id="createForm">
+        <div class="auth-field">
+          <input id="createName" type="text" placeholder="Your name" autocomplete="off" required>
+        </div>
+        <div class="auth-field">
+          <input id="createPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="Choose a passcode" autocomplete="off" required>
+        </div>
+        <div class="auth-field">
+          <input id="createPinConfirm" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="Confirm passcode" autocomplete="off" required>
+        </div>
+        <div class="auth-error" id="createError"></div>
+        <button type="submit" class="btn">Create profile</button>
+      </form>
+    </div>
+
+    <!-- CONFIRM (redirect back to passcode entry right after creating) -->
+    <div class="auth-view" id="authConfirm">
+      <h2>Profile created</h2>
+      <p id="confirmText">Enter the passcode you just set to continue.</p>
+      <form id="confirmForm">
+        <input id="confirmPinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" autocomplete="off" required>
+        <div class="auth-error" id="confirmError">That doesn't match. Try again.</div>
+        <button type="submit" class="btn">Unlock</button>
+      </form>
+    </div>
+
     <div class="lock-hint">Heads up: this is a light profile lock for sharing the app around, not real security — anyone with device access to this browser could still find the data in it.</div>
   </div>
 </div>
 
+<div id="greetOverlay">
+  <div>
+    <div class="gtime" id="greetTime"></div>
+    <h2 id="greetHeadline">Hi</h2>
+    <p id="greetSub"></p>
+  </div>
+</div>
+
 <div class="app">
+  <div id="demoBanner">
+    <span>Viewing sample data — nothing here is saved yet.</span>
+    <button type="button" id="demoSignInBtn">Create profile / Sign in</button>
+  </div>
   <header class="top">
     <div class="brand">
       <svg class="logo-mark" width="32" height="32" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -399,8 +494,17 @@
         </div>
       </div>
 
+      <div class="panel" id="bracketPanel" style="display:none;">
+        <h3 id="bracketTitle">Your salary bracket guide</h3>
+        <div id="bracketBars"></div>
+        <div class="plan-total" id="bracketTotal"></div>
+        <div id="bracketTips"></div>
+        <div id="bracketLinks"></div>
+        <div class="lock-hint" style="margin-top:14px; text-align:left;">This is general, educational guidance drawn from common financial-planning principles — not personalized investment advice. For decisions specific to your situation, a licensed financial advisor is the right call.</div>
+      </div>
+
       <div class="panel">
-        <h3>Choose a planning method</h3>
+        <h3>Or pick a specific budgeting method</h3>
         <div class="rule-cards" id="ruleCards"></div>
       </div>
 
@@ -515,6 +619,7 @@ function loadState(){
   return s;
 }
 function saveState(state){
+  if(!STORAGE_KEY) return; // no active profile — demo data is never persisted
   state.updatedAt = Date.now();
   try{
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -528,32 +633,161 @@ function saveState(state){
 
 let state = { entries: [], budgets: {}, nextId: 1000 };
 
-// ---------- Profile lock ----------
-function unlockProfile(pin){
-  STORAGE_KEY = STORAGE_PREFIX + '::' + hashStr(pin).toString(16);
-  try{ sessionStorage.setItem('activeProfilePin', pin); }catch(e){}
+// ---------- Sample data (explore mode, never saved) ----------
+function sampleData(){
+  const Y = new Date().getFullYear();
+  const d = (day)=> `${Y}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  const day1 = Math.max(1, new Date().getDate()-6);
+  return {
+    entries: [
+      {id:1, date:d(day1), amount:280, category:'Transport', note:'Auto'},
+      {id:2, date:d(day1), amount:150, category:'Food', note:'Filter coffee + snack'},
+      {id:3, date:d(Math.min(day1+1,28)), amount:1200, category:'Shopping', note:'Groceries'},
+      {id:4, date:d(Math.min(day1+2,28)), amount:99, category:'Fun', note:'Movie ticket'},
+      {id:5, date:d(Math.min(day1+2,28)), amount:2000, category:'Sports', note:'Gym membership'},
+      {id:6, date:d(Math.min(day1+3,28)), amount:220, category:'Food', note:'Lunch'},
+      {id:7, date:d(Math.min(day1+4,28)), amount:500, category:'Gift', note:'Birthday gift'},
+      {id:8, date:d(Math.min(day1+5,28)), amount:180, category:'Transport', note:'Metro card top-up'},
+    ],
+    budgets: {}, nextId: 9000, salary: 45000, selectedRuleId: '50-30-20',
+  };
+}
+
+// ---------- Profile registry ----------
+function getProfiles(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_PREFIX + '::profiles')) || {}; }catch(e){ return {}; }
+}
+function saveProfiles(p){
+  try{ localStorage.setItem(STORAGE_PREFIX + '::profiles', JSON.stringify(p)); }catch(e){}
+}
+
+let currentProfile = null; // {hash, name} once signed in
+let pendingProfile = null; // {hash, name} awaiting the post-create confirm step
+
+function requireProfile(){
+  if(currentProfile) return true;
+  openAuthModal();
+  return false;
+}
+
+function enterDemoMode(){
+  currentProfile = null;
+  STORAGE_KEY = null;
+  state = sampleData();
   foundSavedData = true;
   lastSaveFailed = false;
-  state = loadState();
   document.getElementById('lockOverlay').style.display = 'none';
+  document.getElementById('demoBanner').style.display = 'flex';
   bootApp();
 }
 
-function lockApp(){
-  try{ sessionStorage.removeItem('activeProfilePin'); }catch(e){}
-  STORAGE_KEY = null;
+function openAuthModal(){
+  const hasProfiles = Object.keys(getProfiles()).length > 0;
+  setAuthTab(hasProfiles ? 'signIn' : 'create');
   document.getElementById('lockOverlay').style.display = 'flex';
-  document.getElementById('pinInput').value = '';
-  document.getElementById('pinInput').focus();
 }
 
-document.getElementById('lockForm').addEventListener('submit', (ev)=>{
+function setAuthTab(tab){
+  document.getElementById('toggleSignIn').classList.toggle('active', tab==='signIn');
+  document.getElementById('toggleCreate').classList.toggle('active', tab==='create');
+  document.getElementById('authSignIn').classList.toggle('active', tab==='signIn');
+  document.getElementById('authCreate').classList.toggle('active', tab==='create');
+  document.getElementById('authConfirm').classList.remove('active');
+  document.getElementById('signInError').classList.remove('show');
+  document.getElementById('createError').classList.remove('show');
+  const focusId = tab==='signIn' ? 'pinInput' : 'createName';
+  setTimeout(()=>{ const el = document.getElementById(focusId); if(el) el.focus(); }, 30);
+}
+document.getElementById('toggleSignIn').addEventListener('click', ()=>setAuthTab('signIn'));
+document.getElementById('toggleCreate').addEventListener('click', ()=>setAuthTab('create'));
+document.getElementById('demoSignInBtn').addEventListener('click', openAuthModal);
+
+document.getElementById('signInForm').addEventListener('submit', (ev)=>{
   ev.preventDefault();
   const pin = document.getElementById('pinInput').value.trim();
   if(!pin) return;
-  unlockProfile(pin);
+  const hash = hashStr(pin).toString(16);
+  const profiles = getProfiles();
+  if(profiles[hash]){
+    finalizeLogin(hash, profiles[hash].name);
+  } else {
+    document.getElementById('signInError').classList.add('show');
+  }
 });
-document.getElementById('lockBtn').addEventListener('click', lockApp);
+
+document.getElementById('createForm').addEventListener('submit', (ev)=>{
+  ev.preventDefault();
+  const name = document.getElementById('createName').value.trim();
+  const pin = document.getElementById('createPin').value.trim();
+  const pinConfirm = document.getElementById('createPinConfirm').value.trim();
+  const errEl = document.getElementById('createError');
+  errEl.classList.remove('show');
+  if(!name || !pin){ errEl.textContent = 'Enter your name and a passcode.'; errEl.classList.add('show'); return; }
+  if(pin !== pinConfirm){ errEl.textContent = "Passcodes don't match — try again."; errEl.classList.add('show'); return; }
+  const hash = hashStr(pin).toString(16);
+  const profiles = getProfiles();
+  if(profiles[hash]){ errEl.textContent = 'That passcode is already taken — choose another.'; errEl.classList.add('show'); return; }
+  profiles[hash] = { name, createdAt: Date.now() };
+  saveProfiles(profiles);
+  pendingProfile = { hash, name };
+  document.getElementById('createForm').reset();
+  document.getElementById('confirmText').textContent = `Enter the passcode you just set, ${name}, to continue.`;
+  document.getElementById('authSignIn').classList.remove('active');
+  document.getElementById('authCreate').classList.remove('active');
+  document.getElementById('authConfirm').classList.add('active');
+  setTimeout(()=>document.getElementById('confirmPinInput').focus(), 30);
+});
+
+document.getElementById('confirmForm').addEventListener('submit', (ev)=>{
+  ev.preventDefault();
+  const pin = document.getElementById('confirmPinInput').value.trim();
+  if(pendingProfile && hashStr(pin).toString(16) === pendingProfile.hash){
+    finalizeLogin(pendingProfile.hash, pendingProfile.name);
+  } else {
+    document.getElementById('confirmError').classList.add('show');
+  }
+});
+
+function greetingFor(name){
+  const h = new Date().getHours();
+  if(h>=5 && h<12) return {headline:`Good morning, ${name}`, sub:'Log today’s spend before the day runs off with you.'};
+  if(h>=12 && h<17) return {headline:`Good afternoon, ${name}`, sub:'A quick log now beats reconstructing it tonight.'};
+  if(h>=17 && h<22) return {headline:`Good evening, ${name}`, sub:'Wrap up today’s spends while they’re fresh.'};
+  return {headline:`Still up, ${name}?`, sub:'Log tonight’s spend before you crash — future you will thank you.'};
+}
+
+function finalizeLogin(hash, name){
+  STORAGE_KEY = STORAGE_PREFIX + '::' + hash;
+  try{ sessionStorage.setItem('activeProfileHash', hash); }catch(e){}
+  currentProfile = { hash, name };
+  foundSavedData = true;
+  lastSaveFailed = false;
+  state = loadState();
+  pendingProfile = null;
+  document.getElementById('lockOverlay').style.display = 'none';
+  document.getElementById('demoBanner').style.display = 'none';
+  document.getElementById('pinInput').value = '';
+  document.getElementById('confirmPinInput').value = '';
+
+  const g = greetingFor(name);
+  document.getElementById('greetTime').textContent = new Date().toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'});
+  document.getElementById('greetHeadline').textContent = g.headline;
+  document.getElementById('greetSub').textContent = g.sub;
+  const greetEl = document.getElementById('greetOverlay');
+  greetEl.style.display = 'flex';
+  bootApp();
+  const dismiss = ()=>{ greetEl.style.display = 'none'; greetEl.removeEventListener('click', dismiss); };
+  greetEl.addEventListener('click', dismiss);
+  setTimeout(dismiss, 2600);
+}
+
+function logout(){
+  try{ sessionStorage.removeItem('activeProfileHash'); }catch(e){}
+  enterDemoMode();
+}
+document.getElementById('lockBtn').addEventListener('click', ()=>{
+  if(currentProfile) logout(); else openAuthModal();
+});
 
 function renderDataStatus(){
   const el = document.getElementById('dataStatus');
@@ -714,6 +948,7 @@ document.getElementById('fDate').value = todayStr();
 
 document.getElementById('entryForm').addEventListener('submit', (ev)=>{
   ev.preventDefault();
+  if(!requireProfile()) return;
   const editId = document.getElementById('editId').value;
   const date = document.getElementById('fDate').value;
   const amount = parseFloat(document.getElementById('fAmount').value);
@@ -777,6 +1012,7 @@ function editEntry(id){
 }
 
 function deleteEntry(id){
+  if(!requireProfile()) return;
   if(!confirm('Delete this entry?')) return;
   state.entries = state.entries.filter(e=>e.id!==id);
   saveState(state);
@@ -860,6 +1096,7 @@ document.getElementById('importBtn').addEventListener('click', ()=> document.get
 document.getElementById('importFile').addEventListener('change', (e)=>{
   const file = e.target.files[0];
   if(!file) return;
+  if(!requireProfile()){ e.target.value = ''; return; }
   const reader = new FileReader();
   reader.onload = (evt)=>{
     try{
@@ -923,6 +1160,7 @@ function renderBudgetTab(){
 }
 
 function setBudget(category, value){
+  if(!requireProfile()){ renderBudgetTab(); return; }
   const amt = parseFloat(value) || 0;
   if(!state.budgets[budgetMonth]) state.budgets[budgetMonth] = {};
   state.budgets[budgetMonth][category] = amt;
@@ -931,6 +1169,93 @@ function setBudget(category, value){
 }
 
 // ---------- Financial planning ----------
+// Educational guidance, not personalized financial advice. Splits scale with
+// income based on commonly cited Indian personal-finance guidelines: needs
+// dominate at lower brackets (fixed city living costs eat a bigger share of
+// a smaller salary), savings capacity grows as income rises. See sources
+// discussed in chat (SEBI/NISM investor education, common 50/30/20 and
+// emergency-fund guidance, income-linked SIP/mutual-fund allocation ranges).
+const FINANCE_LINKS = [
+  {label:'Zerodha Varsity — free, ground-up stock market course', url:'https://zerodha.com/varsity/'},
+  {label:'SEBI Investor Education — official investor awareness resources', url:'https://investor.sebi.gov.in/'},
+  {label:'NISM (SEBI-run institute) — investor certification & courses', url:'https://www.nism.ac.in/'},
+];
+
+const SALARY_BRACKETS = [
+  {min:20000, max:25000, label:'₹20,000 – ₹25,000', needs:78, wants:12, savings:10, emergencyMonths:6,
+    invest:'At this stage, the win is building the habit, not the amount. Even ₹100–₹500/month into a SIP counts — most Indian mutual funds now allow SIPs from ₹100. Put savings into a liquid fund or recurring deposit first; hold off on equity until you have at least 1–2 months of expenses set aside.',
+    tips:['Track every rupee for a month first — at this income, the biggest gains usually come from trimming small recurring leaks (subscriptions, delivery fees, impulse buys), not from investment returns.','Upskilling is your highest-leverage move here: a certification or a better-paying job search typically moves the needle far more than squeezing the budget further.','Look at low-effort side income you can do around a full-time job — tutoring, freelancing on a skill you already have, or content work — even ₹3,000–₹5,000/month extra meaningfully changes this bracket\'s math.']},
+  {min:26000, max:30000, label:'₹26,000 – ₹30,000', needs:74, wants:14, savings:12, emergencyMonths:6,
+    invest:'Start a small SIP (₹500–₹1,500/month) once you have 1–2 months of expenses saved. Favor index funds or large-cap mutual funds over picking individual stocks at this stage — lower research burden, steadier ride while you\'re learning.',
+    tips:['Automate the savings the day salary lands, even a small fixed amount — paying yourself first beats trying to save whatever\'s left over.','Keep building your emergency fund toward 6 months of essentials before increasing investment amounts.','Revisit your skills/CV every few months — at this income level, a job change is often the fastest raise available.']},
+  {min:31000, max:35000, label:'₹31,000 – ₹35,000', needs:70, wants:16, savings:14, emergencyMonths:6,
+    invest:'Once your emergency fund is underway, aim for roughly 10% of salary into SIPs (mostly index/large-cap funds). Keep the rest of savings liquid until that buffer is solid.',
+    tips:['This is a good point to open a PPF or start EPF contributions if you haven\'t — long horizon, tax-advantaged, and painless once automated.','Negotiate at appraisal time with market-rate data in hand — many salaried employees under-ask simply by not benchmarking.','Consider a focused side skill (e.g. a tool, language, or certification specific to your field) rather than spreading thin — depth pays off faster than breadth at this stage.']},
+  {min:36000, max:40000, label:'₹36,000 – ₹40,000', needs:65, wants:18, savings:17, emergencyMonths:5,
+    invest:'You can push SIPs toward 12–15% of salary. A common rule of thumb for equity exposure is "100 minus your age" as a rough %, adjusted down if you\'re risk-averse — e.g. at 26, that\'s roughly 70% equity / 30% safer instruments within your investments.',
+    tips:['Start separating "goals" — an equity SIP for long-term wealth, and a separate debt fund/RD for medium-term goals (a laptop, a trip, a deposit).','If you\'re not already, check whether your employer EPF + any NPS option covers retirement adequately, or whether a small independent SIP toward retirement makes sense alongside it.','Side income options widen here — look at freelancing in your actual professional skill (design, writing, dev, analytics) rather than generic gig work; it pays better per hour.']},
+  {min:41000, max:50000, label:'₹41,000 – ₹50,000', needs:60, wants:20, savings:20, emergencyMonths:5,
+    invest:'This is where the classic 50/30/20 split becomes realistic. Of your 20% savings, a common guideline is keeping 10% of total salary flowing into equity SIPs (index funds to start), with the rest split between emergency buffer and any debt payoff.',
+    tips:['If you\'re debt-free with a full emergency fund, this is a reasonable point to open a direct equity/demat account and start learning stock selection with a small, dedicated amount — treat it as tuition, not your core portfolio.','Review recurring subscriptions and lifestyle creep every 6 months — wants tend to expand quietly as income rises.','Look at ELSS mutual funds for the tax-saving portion of your 80C limit — it doubles as equity exposure with a 3-year lock-in.']},
+  {min:51000, max:60000, label:'₹51,000 – ₹60,000', needs:55, wants:22, savings:23, emergencyMonths:4,
+    invest:'Aim for 15–20% of salary into equity (index funds + a few well-researched large/mid-cap funds), keeping 3–5% in debt instruments for balance. Once your emergency fund is complete, redirect what was going to it into investments.',
+    tips:['Consider stepping up your SIP amount by 10% every year in line with raises — a "SIP step-up" compounds noticeably over a decade.','This is a comfortable point to start a separate goal-based fund (down payment, further education, a big purchase) rather than one big undifferentiated pool.','Explore consulting or freelance work in your specialty as a side stream — at this experience level your hourly value is usually well above generic side gigs.']},
+  {min:61000, max:70000, label:'₹61,000 – ₹70,000', needs:50, wants:25, savings:25, emergencyMonths:4,
+    invest:'A textbook 50/30/20 fits well here. Within the 20–25% savings, many planners suggest 15%+ of total salary into equity, applying the "100 minus age" rule for the equity-vs-debt split inside that.',
+    tips:['If not already maxing 80C (₹1.5L/yr via EPF+PPF+ELSS etc.), this income level usually allows it — worth doing for the tax efficiency alone.','Consider term life insurance if you have dependents — cheap at this age, and pure protection (not an investment-insurance hybrid).','Keep upskilling toward leadership/specialist tracks — income growth from career progression usually outpaces what extra saving alone can achieve.']},
+  {min:71000, max:80000, label:'₹71,000 – ₹80,000', needs:45, wants:25, savings:30, emergencyMonths:3,
+    invest:'You can comfortably push toward 30% savings, with roughly 20%+ of salary into equity if your risk appetite and horizon support it. Diversify across index funds, a couple of active large/flexi-cap funds, and consider starting direct stock exposure with a defined, smaller allocation.',
+    tips:['Consider NPS (Tier 1) for an additional ₹50,000 deduction under 80CCD(1B), on top of your 80C limit, if retirement planning is a priority.','Review asset allocation yearly, not just contributions — rebalance if equity has drifted far from your target %.','This income supports meaningful side investing in learning (courses, certifications, even a small business experiment) — the ROI on your own skills is usually still your best-performing asset.']},
+  {min:81000, max:90000, label:'₹81,000 – ₹90,000', needs:42, wants:25, savings:33, emergencyMonths:3,
+    invest:'With a solid emergency fund, 30%+ savings with roughly 22–25% of salary into equity is a reasonable range many planners cite for a stable-income earner in this bracket. Start thinking in terms of specific goals (retirement corpus, house down payment, children\'s education) with separate SIPs for each.',
+    tips:['This is a good point to get a fee-only financial planner for an hour — a one-time consultation to sanity-check your allocation is inexpensive relative to the amounts now in motion.','Watch for lifestyle inflation eating the raise entirely — a rule some follow is banking at least half of every increment.','Look at tax regime choice (old vs new) each year — at this income, the better option can shift as deductions and income change.']},
+  {min:91000, max:100000, label:'₹91,000 – ₹1,00,000', needs:40, wants:25, savings:35, emergencyMonths:3,
+    invest:'Many planners suggest 35%+ savings is achievable here, with 25%+ of salary into equity for someone with a long horizon and stable income — scaled down if you have near-term big-ticket goals or a lower risk appetite. Diversify beyond mutual funds into direct equity, and consider international fund exposure for diversification.',
+    tips:['This is a reasonable point to formalize a written financial plan — retirement corpus target, goal amounts and timelines, insurance cover — rather than running purely on rules of thumb.','Review insurance cover (life + health) against your current income and dependents; cover needs typically rise faster than people update it.','Consider whether additional income is better spent on new skills/ventures or on investing — at this level, both often make sense in parallel.']},
+  {min:100001, max:Infinity, label:'Above ₹1,00,000', needs:35, wants:25, savings:40, emergencyMonths:3,
+    invest:'At this level, the constraint usually shifts from "can I save enough" to "how do I allocate well." 40%+ savings with meaningful equity exposure (many planners suggest 25–35%+ of salary, adjusted by age and risk appetite via something like the 100-minus-age rule) is common guidance, alongside real diversification: equity, debt, possibly real estate or REITs, and tax-efficient structuring.',
+    tips:['A fee-only certified financial planner (not a commission-based agent) is worth engaging properly at this income level — the fee is small relative to the decisions being optimized.','Make sure protection (term life, health, possibly disability cover) scales with income and dependents, not just investments.','Consider diversifying income sources themselves — equity in a side venture, consulting, or rental income — rather than relying solely on salary plus market returns.']},
+];
+
+function findBracket(salary){
+  return SALARY_BRACKETS.find(b=>salary>=b.min && salary<=b.max);
+}
+
+function renderBracketGuide(salary){
+  const panel = document.getElementById('bracketPanel');
+  const bracket = salary>0 ? findBracket(salary) : null;
+  if(!bracket){ panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  document.getElementById('bracketTitle').textContent = `Your salary bracket guide · ${bracket.label}`;
+
+  const buckets = [
+    {label:'Needs', pct:bracket.needs},
+    {label:'Wants', pct:bracket.wants},
+    {label:'Savings & investing', pct:bracket.savings},
+  ];
+  const maxPct = Math.max(...buckets.map(b=>b.pct));
+  document.getElementById('bracketBars').innerHTML = buckets.map((b,i)=>{
+    const amt = salary * b.pct / 100;
+    const color = EXTRA_PALETTE[i % EXTRA_PALETTE.length];
+    return `
+    <div class="bar-row">
+      <div class="name"><span class="dot" style="background:${color}"></span>${b.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(b.pct/maxPct*100).toFixed(1)}%;background:${color}"></div></div>
+      <div class="bar-amt">${fmt(amt)}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('bracketTotal').innerHTML = `<span>In-hand salary</span><span>${fmt(salary)}</span>`;
+
+  const emergencyTarget = salary * bracket.needs/100 * bracket.emergencyMonths;
+  const tips = [
+    `Emergency fund target: roughly ${fmt(emergencyTarget)} (${bracket.emergencyMonths} months of essentials) in a savings account or liquid fund, before investing aggressively.`,
+    bracket.invest,
+    ...bracket.tips,
+  ];
+  document.getElementById('bracketTips').innerHTML = '<ul class="tip-list">' + tips.map(t=>`<li>${t}</li>`).join('') + '</ul>';
+  document.getElementById('bracketLinks').innerHTML = '<div class="link-list">' + FINANCE_LINKS.map(l=>`<a href="${l.url}" target="_blank" rel="noopener">${l.label} ↗</a>`).join('') + '</div>';
+}
+
 const BUDGET_RULES = [
   {id:'50-30-20', name:'50/30/20 Rule', split:'50·30·20', blurb:'The classic split: essentials, lifestyle spending, and savings.', buckets:[
     {label:'Needs', pct:50},{label:'Wants', pct:30},{label:'Savings', pct:20}
@@ -953,12 +1278,14 @@ const BUDGET_RULES = [
 ];
 
 document.getElementById('fSalary').addEventListener('change', (e)=>{
+  if(!requireProfile()){ renderPlanTab(); return; }
   state.salary = parseFloat(e.target.value) || 0;
   saveState(state);
   renderPlanTab();
 });
 
 function selectRule(ruleId){
+  if(!requireProfile()) return;
   state.selectedRuleId = ruleId;
   saveState(state);
   renderPlanTab();
@@ -966,6 +1293,7 @@ function selectRule(ruleId){
 
 function renderPlanTab(){
   document.getElementById('fSalary').value = state.salary || '';
+  renderBracketGuide(state.salary || 0);
 
   document.getElementById('ruleCards').innerHTML = BUDGET_RULES.map(r=>`
     <button type="button" class="rule-card${state.selectedRuleId===r.id?' selected':''}" onclick="selectRule('${r.id}')">
@@ -1008,12 +1336,20 @@ function bootApp(){
 }
 
 (function tryResumeSession(){
-  let pin = null;
-  try{ pin = sessionStorage.getItem('activeProfilePin'); }catch(e){}
-  if(pin){
-    unlockProfile(pin);
+  let hash = null;
+  try{ hash = sessionStorage.getItem('activeProfileHash'); }catch(e){}
+  const profiles = getProfiles();
+  if(hash && profiles[hash]){
+    // Silent resume within the same browser session — no need to replay the
+    // greeting animation on every reload, just the first unlock of a session.
+    STORAGE_KEY = STORAGE_PREFIX + '::' + hash;
+    currentProfile = { hash, name: profiles[hash].name };
+    state = loadState();
+    document.getElementById('lockOverlay').style.display = 'none';
+    document.getElementById('demoBanner').style.display = 'none';
+    bootApp();
   } else {
-    document.getElementById('lockOverlay').style.display = 'flex';
+    enterDemoMode();
   }
 })();
 </script>
