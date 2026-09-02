@@ -904,7 +904,7 @@ function greetingFor(name){
 
 function finalizeLogin(hash, name){
   STORAGE_KEY = STORAGE_PREFIX + '::' + hash;
-  try{ sessionStorage.setItem('activeProfileHash', hash); }catch(e){}
+  try{ localStorage.setItem('activeProfileHash', hash); }catch(e){}
   currentProfile = { hash, name };
   foundSavedData = true;
   lastSaveFailed = false;
@@ -928,7 +928,7 @@ function finalizeLogin(hash, name){
 }
 
 function logout(){
-  try{ sessionStorage.removeItem('activeProfileHash'); }catch(e){}
+  try{ localStorage.removeItem('activeProfileHash'); }catch(e){}
   enterDemoMode();
 }
 document.getElementById('lockBtn').addEventListener('click', ()=>{
@@ -1858,11 +1858,11 @@ function bootApp(){
 
 (function tryResumeSession(){
   let hash = null;
-  try{ hash = sessionStorage.getItem('activeProfileHash'); }catch(e){}
+  try{ hash = localStorage.getItem('activeProfileHash'); }catch(e){}
   const profiles = getProfiles();
   if(hash && profiles[hash]){
-    // Silent resume within the same browser session — no need to replay the
-    // greeting animation on every reload, just the first unlock of a session.
+    // Stays signed in across app closes/reopens until Lock is tapped — no
+    // greeting replay here, just the first unlock after signing in.
     STORAGE_KEY = STORAGE_PREFIX + '::' + hash;
     currentProfile = { hash, name: profiles[hash].name };
     state = loadState();
