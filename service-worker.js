@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spend-tracker-v2-2026-11-23';
+const CACHE_NAME = 'spend-tracker-v3-2026-11-23-overall';
 const SHELL_FILES = [
   './',
   './index.html',
@@ -6,6 +6,10 @@ const SHELL_FILES = [
   './icons/icon-192.png',
   './icons/icon-512.png',
 ];
+
+self.addEventListener('message',event=>{
+  if(event.data?.type==='GET_VERSION') event.ports[0]?.postMessage({version:CACHE_NAME});
+});
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

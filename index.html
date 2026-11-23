@@ -175,6 +175,55 @@
   .month-total .count{font-size:12px; color:var(--muted);}
   .monthly-grand-total{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:12px; margin-top:12px; font-weight:600;}
   .heatmap-weekdays{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); text-align:center; font-size:11px; color:var(--muted); margin-bottom:6px;}
+  .overall-intro{margin-bottom:18px;}
+  .overall-intro h2{font:600 25px "Fraunces",Georgia,serif; margin:0 0 6px;}
+  .overall-intro p,.overall-caption{font-size:13px; line-height:1.5; color:var(--muted); margin:6px 0 0;}
+  .overall-hero{border-top:3px solid var(--accent);}
+  .overall-hero .value{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:clamp(25px,7vw,36px); color:var(--accent); overflow-wrap:anywhere;}
+  .overall-hero .label{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;}
+  .overall-stats{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:12px;}
+  .overall-stat{padding:12px; border-radius:8px; background:var(--panel2);}
+  .overall-stat strong{display:block; font-family:"IBM Plex Mono",monospace; font-size:17px; overflow-wrap:anywhere;}
+  .overall-stat span{font-size:12px; color:var(--muted); line-height:1.5;}
+  .graph-switch{display:flex; flex-wrap:wrap; gap:6px; margin:14px 0;}
+  .graph-switch button{font:inherit; font-size:12px; color:var(--muted); padding:8px 12px; background:var(--panel2); border:1px solid var(--border); border-radius:7px; cursor:pointer;}
+  .graph-switch button[aria-pressed="true"]{color:var(--text); border-color:var(--accent);}
+  .spend-chart-scroll{overflow-x:auto; max-width:100%; border-radius:8px;}
+  .spend-chart{display:block; width:100%; height:auto; color:var(--muted);}
+  .spend-chart text{font:12px "Work Sans",system-ui,sans-serif; fill:currentColor;}
+  .spend-chart .chart-bar{fill:var(--accent); opacity:.6;}
+  .spend-chart [aria-pressed="true"] .chart-bar{opacity:1;}
+  .spend-chart [data-chart-month]{cursor:pointer;}
+  .spend-chart [data-chart-month]:focus .chart-bar{stroke:var(--text); stroke-width:2;}
+  .chart-detail{display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; padding:12px; margin-top:12px; border-radius:8px; background:var(--panel2);}
+  .chart-detail strong{font-family:"IBM Plex Mono",monospace;}
+  .chart-detail p{font-size:12px; color:var(--muted); margin:5px 0;}
+  .overall-category{width:100%; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px 12px; background:transparent; color:var(--text); padding:12px 0; border:0; border-bottom:1px solid var(--border); text-align:left; font:inherit; font-size:13px; cursor:pointer;}
+  .overall-category .name{display:flex; align-items:center; gap:7px; overflow-wrap:anywhere; min-width:0;}
+  .overall-category .amount{font-family:"IBM Plex Mono",monospace;}
+  .overall-category .bar-track{grid-column:1/-1; width:100%; height:5px;}
+  .overall-category .share{font-size:12px; color:var(--muted);}
+  .money-personality{padding:14px; border-left:3px solid var(--accent); background:var(--panel2); border-radius:8px; margin-bottom:14px;}
+  .money-personality strong{font:600 20px "Fraunces",Georgia,serif;}
+  .money-personality p{margin:6px 0 0; font-size:13px; color:var(--muted); line-height:1.5; overflow-wrap:anywhere;}
+  .habit-progress{margin:12px 0;}
+  .habit-progress .bar-track{height:8px; margin-top:8px;}
+  .badges{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px;}
+  .habit-badge{padding:12px; border:1px dashed var(--border); border-radius:9px; background:var(--panel2);}
+  .habit-badge.earned{border:1px solid var(--good); background:var(--good-bg);}
+  .habit-badge strong{display:block; font-size:13px; line-height:1.4;}
+  .habit-badge span{display:block; margin-top:4px; font-size:12px; color:var(--muted); line-height:1.4;}
+  .habit-badge .badge-status{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:6px;}
+  .habit-badge.earned .badge-status{color:var(--good);}
+  .swap-control{display:flex; gap:10px; align-items:center; margin:14px 0;}
+  .swap-control input{padding:0; accent-color:var(--accent); cursor:pointer;}
+  .swap-control output{min-width:68px; text-align:right; font-family:"IBM Plex Mono",monospace;}
+  .swap-result{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;}
+  .swap-result div{padding:12px; background:var(--panel2); border-radius:8px;}
+  .swap-result strong{display:block; font-family:"IBM Plex Mono",monospace; color:var(--accent); font-size:18px;}
+  .swap-result span{font-size:12px; color:var(--muted);}
+  button:focus-visible,[role="button"]:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  @media(max-width:420px){nav.tabs{padding:0 12px;} nav.tabs button{padding:12px 9px 11px; font-size:13px;}}
 
   .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
   .toolbar{justify-content:space-between; margin-bottom:14px;}
@@ -409,6 +458,7 @@
 
   <nav class="tabs">
     <button class="tab-btn active" data-tab="overview">Overview</button>
+    <button class="tab-btn" data-tab="overall">Overall</button>
     <button class="tab-btn" data-tab="add">Add Entry</button>
     <button class="tab-btn" data-tab="entries">Entries</button>
   </nav>
@@ -460,6 +510,49 @@
       <div class="btn-row">
         <button class="btn secondary small" id="shareRecapBtn">Share this month's recap</button>
       </div>
+    </div>
+
+    <!-- OVERALL -->
+    <div class="view" id="tab-overall">
+      <div class="overall-intro">
+        <h2>Your money story</h2>
+        <p>Every month, one big picture. Explore where it all went.</p>
+      </div>
+      <div class="panel overall-hero" id="overallSummary"></div>
+      <div class="panel">
+        <h3>Your spending timeline</h3>
+        <p class="overall-caption">Tap a bar to explore that month. Months without entries show zero recorded spend.</p>
+        <div class="graph-switch" role="group" aria-label="Spending graph type">
+          <button type="button" data-graph-mode="monthly" aria-pressed="true">Monthly spends</button>
+          <button type="button" data-graph-mode="cumulative" aria-pressed="false">Running total</button>
+        </div>
+        <div class="spend-chart-scroll" id="overallChart"></div>
+        <div class="chart-detail" id="overallChartDetail" aria-live="polite"></div>
+      </div>
+      <div class="panel">
+        <h3>Where it all goes</h3>
+        <p class="overall-caption">Categories across every month. Tap one to see the details.</p>
+        <div id="overallCategories"></div>
+      </div>
+      <div class="panel">
+        <h3>Your tracking wins</h3>
+        <div id="moneyPersonality" class="money-personality"></div>
+        <div id="habitProgress" class="habit-progress"></div>
+        <div id="trackingBadges" class="badges"></div>
+        <p class="overall-caption">Badges celebrate keeping a record. Log real expenses when they happen.</p>
+      </div>
+      <div class="panel">
+        <h3>The tiny-swap game</h3>
+        <p class="overall-caption">What could a small daily saving add up to? Move the slider to play.</p>
+        <label for="dailySwap" style="margin-top:12px;">Imagine setting aside this much each day</label>
+        <div class="swap-control">
+          <input type="range" id="dailySwap" min="0" max="500" step="10" value="50">
+          <output id="dailySwapValue" for="dailySwap">₹50</output>
+        </div>
+        <div class="swap-result" id="swapResult" aria-live="polite"></div>
+        <p class="overall-caption">A what-if calculation, with no investment returns assumed.</p>
+      </div>
+      <button type="button" class="btn" id="overallLogBtn">Log a real-life expense</button>
     </div>
 
     <!-- ADD ENTRY -->
@@ -547,6 +640,7 @@
 </div>
 
 <script>
+const APP_RELEASE = 'spend-tracker-v3-2026-11-23-overall';
 if('serviceWorker' in navigator){
   const wasControlled = !!navigator.serviceWorker.controller;
   window.addEventListener('load', ()=>{
@@ -559,10 +653,18 @@ if('serviceWorker' in navigator){
     }).catch(()=>{});
 
     let refreshedOnce = false;
-    navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+    navigator.serviceWorker.addEventListener('controllerchange', async ()=>{
       // First-time installation must not reload a form someone has started filling.
       if(refreshedOnce || !wasControlled) return;
       refreshedOnce = true;
+      const version = await new Promise(resolve=>{
+        const channel = new MessageChannel();
+        const timer = setTimeout(()=>{ channel.port1.close(); resolve(null); },1000);
+        channel.port1.onmessage = event=>{ clearTimeout(timer); channel.port1.close(); resolve(event.data?.version); };
+        navigator.serviceWorker.controller?.postMessage({type:'GET_VERSION'},[channel.port2]);
+      });
+      // Navigation may have already loaded the new page before its worker activated.
+      if(version===APP_RELEASE) return;
       if(document.getElementById('fAmount').value || document.getElementById('editId').value){
         document.getElementById('dataStatus').innerHTML = '<div class="status-banner warn">An app update is ready. Finish saving this entry, then tap Refresh.</div>';
         return;
@@ -939,10 +1041,17 @@ function todayStr(){
 
 let currentMonth = monthKey(todayStr());
 let expandedCategory = null;
+let overallGraphMode = 'monthly';
+let overallSelectedMonth = null;
+let overallExpandedCategory = null;
 
 function resetViewState(){
   currentMonth = monthKey(todayStr());
   expandedCategory = null;
+  overallGraphMode = 'monthly';
+  overallSelectedMonth = null;
+  overallExpandedCategory = null;
+  document.getElementById('dailySwap').value = '50';
   document.getElementById('filterCategory').value = '';
   document.getElementById('searchNotes').value = '';
   document.getElementById('lastAdded').textContent = '';
@@ -971,6 +1080,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
     if(btn.dataset.tab==='entries') renderEntriesTab();
     if(btn.dataset.tab==='overview') renderOverview();
+    if(btn.dataset.tab==='overall') renderOverall();
     if(btn.dataset.tab==='add'){
       renderQuickAdds();
       if(!document.getElementById('editId').value && !document.getElementById('fAmount').value){
@@ -1011,9 +1121,9 @@ function categoryDetailHTML(catId, entries){
     </div>`).join('')}</div>`;
 }
 
-function renderMonthlyTotals(){
+function monthSeries(entries){
   const months = Object.create(null);
-  state.entries.forEach(e=>{
+  entries.forEach(e=>{
     const key = monthKey(e.date);
     if(!months[key]) months[key] = {cents:0,count:0};
     months[key].cents += Math.round(e.amount*100);
@@ -1022,10 +1132,19 @@ function renderMonthlyTotals(){
   // Include this month even before its first entry, plus any missing months in the recorded range.
   const keys = Object.keys(months).concat(monthKey(todayStr())).sort();
   const first = keys[0], last = keys[keys.length-1];
-  const displayMonths = [];
-  for(let key=first;key<=last;key=shiftMonth(key,1)) displayMonths.push(key);
-  document.getElementById('monthlyTotals').innerHTML = displayMonths.reverse().map(key=>{
+  const series = [];
+  let cumulativeCents = 0;
+  for(let key=first;key<=last;key=shiftMonth(key,1)){
     const data = months[key] || {cents:0,count:0};
+    cumulativeCents += data.cents;
+    series.push({key,...data,total:data.cents/100,cumulative:cumulativeCents/100});
+  }
+  return series;
+}
+
+function renderMonthlyTotals(){
+  document.getElementById('monthlyTotals').innerHTML = monthSeries(state.entries).reverse().map(data=>{
+    const key = data.key;
     return `<button type="button" class="month-total" data-month="${key}" aria-current="${key===currentMonth}">
       <span>${monthLabel(key)}</span><span class="amount">${fmt(data.cents/100)}</span>
       <span class="count">${data.count} ${data.count===1?'entry':'entries'}</span>
@@ -1041,6 +1160,168 @@ function renderMonthlyTotals(){
     });
   });
 }
+
+// ---------- Overall: the complete recorded history ----------
+function trackingStreaks(entries){
+  const dates = [...new Set(entries.map(e=>e.date).filter(date=>date<=todayStr()))].sort();
+  let best = 0, run = 0, previous = null;
+  for(const date of dates){
+    const priorDay = new Date(date+'T12:00:00');
+    priorDay.setDate(priorDay.getDate()-1);
+    run = previous===localDateStr(priorDay) ? run+1 : 1;
+    best = Math.max(best,run);
+    previous = date;
+  }
+  const recorded = new Set(dates);
+  const cursor = new Date(todayStr()+'T12:00:00');
+  if(!recorded.has(localDateStr(cursor))) cursor.setDate(cursor.getDate()-1);
+  let current = 0;
+  while(recorded.has(localDateStr(cursor))){ current++; cursor.setDate(cursor.getDate()-1); }
+  return {current,best,days:dates.length};
+}
+
+function renderOverall(){
+  const entries = state.entries;
+  const total = sumMoney(entries);
+  const series = monthSeries(entries);
+  const loggedMonths = series.filter(m=>m.count>0);
+  const dates = entries.map(e=>e.date).sort();
+  const streaks = trackingStreaks(entries);
+  const dateLabel = date=>new Date(date+'T12:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('overallSummary').innerHTML = `
+    <div class="label">All-time recorded spends</div><div class="value">${fmt(total)}</div>
+    <p class="overall-caption">${dates.length ? `${dateLabel(dates[0])} – ${dateLabel(dates[dates.length-1])}` : 'Your money story starts with your first entry.'}</p>
+    <div class="overall-stats">
+      <div class="overall-stat"><strong>${loggedMonths.length}</strong><span>months with entries</span></div>
+      <div class="overall-stat"><strong>${entries.length}</strong><span>expenses recorded</span></div>
+      <div class="overall-stat"><strong>${fmt(loggedMonths.length?total/loggedMonths.length:0)}</strong><span>average per logged month</span></div>
+      <div class="overall-stat"><strong>${fmt(entries.length?total/entries.length:0)}</strong><span>average expense</span></div>
+    </div>`;
+
+  if(!series.some(m=>m.key===overallSelectedMonth)) overallSelectedMonth = loggedMonths.at(-1)?.key || monthKey(todayStr());
+  renderOverallChart(series,entries.length>0);
+
+  const totals = Object.create(null);
+  entries.forEach(e=>{totals[e.category]=(totals[e.category]||0)+Math.round(e.amount*100);});
+  const categories = Object.keys(totals).sort((a,b)=>totals[b]-totals[a]);
+  if(!categories.includes(overallExpandedCategory)) overallExpandedCategory = null;
+  document.getElementById('overallCategories').innerHTML = categories.length ? categories.map(category=>{
+    const amount = totals[category]/100;
+    const share = total ? amount/total*100 : 0;
+    const open = overallExpandedCategory===category;
+    return `<button type="button" class="overall-category" data-overall-category="${escapeHTML(category)}" aria-expanded="${open}">
+      <span class="name"><span class="dot" style="background:${catColor(category)}"></span>${escapeHTML(category)}</span>
+      <span class="amount">${fmt(amount)}</span><span class="share">${share.toFixed(1)}% of all recorded spends</span>
+      <span class="bar-track"><span class="bar-fill" style="display:block;width:${share}%;background:${catColor(category)}"></span></span>
+    </button>${open?categoryDetailHTML(category,entries):''}`;
+  }).join('') : '<div class="empty">Your category story will appear after your first expense.</div>';
+  document.querySelectorAll('[data-overall-category]').forEach(button=>button.addEventListener('click',()=>{
+    overallExpandedCategory = overallExpandedCategory===button.dataset.overallCategory ? null : button.dataset.overallCategory;
+    renderOverall();
+  }));
+
+  const top = categories[0];
+  const personalities = {Food:'Flavour explorer',Transport:'City mover',Shopping:'Style curator',Fun:'Experience collector',Sports:'Active spirit',Donation:'Generous heart',Gift:'Thoughtful giver',Productive:'Builder mindset',Misc:'Life juggler'};
+  document.getElementById('moneyPersonality').innerHTML = top ? `<strong>${personalities[top] || 'Your own kind of spender'}</strong><p>Your largest recorded category is ${escapeHTML(top)}: ${fmt(totals[top]/100)} across all months. What moments are behind those numbers?</p>` : '<strong>A fresh chapter</strong><p>Record your first real expense to discover your spending story.</p>';
+  const milestone = [7,14,30,60,100].find(n=>n>streaks.days);
+  const progress = milestone ? Math.min(100,streaks.days/milestone*100) : 100;
+  document.getElementById('habitProgress').innerHTML = `<p class="overall-caption"><strong>${streaks.days} days journaled</strong> · ${milestone?`${milestone-streaks.days} more to the ${milestone}-day milestone`:'100-day milestone unlocked'}</p>
+    <div class="bar-track" role="progressbar" aria-label="Journaled days milestone" aria-valuemin="0" aria-valuemax="${milestone || 100}" aria-valuenow="${Math.min(streaks.days,milestone || 100)}"><div class="bar-fill" style="width:${progress}%;background:var(--good)"></div></div>
+    <p class="overall-caption">Current logging streak: ${streaks.current} ${streaks.current===1?'day':'days'} · Best: ${streaks.best} ${streaks.best===1?'day':'days'}</p>`;
+  const badges = [
+    {name:'First chapter',earned:entries.length>0,detail:'Record your first expense.'},
+    {name:'Week in view',earned:streaks.days>=7,detail:'Keep records on 7 different days.'},
+    {name:'Month explorer',earned:loggedMonths.length>=2,detail:'Track expenses in 2 months.'},
+    {name:'Pattern spotter',earned:categories.length>=3,detail:'Discover 3 spending categories.'}
+  ];
+  document.getElementById('trackingBadges').innerHTML = badges.map(b=>`<div class="habit-badge${b.earned?' earned':''}"><span class="badge-status">${b.earned?'Unlocked':'Next adventure'}</span><strong>${b.name}</strong><span>${b.detail}</span></div>`).join('');
+  renderSwapGame();
+}
+
+function axisMoney(n){
+  if(n>=1e7) return `₹${Number((n/1e7).toFixed(1))}Cr`;
+  if(n>=1e5) return `₹${Number((n/1e5).toFixed(1))}L`;
+  if(n>=1e3) return `₹${Number((n/1e3).toFixed(1))}k`;
+  return fmt(roundMoney(n));
+}
+
+function renderOverallChart(series,hasEntries){
+  document.querySelectorAll('[data-graph-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.graphMode===overallGraphMode)));
+  const selected = series.find(m=>m.key===overallSelectedMonth) || series[series.length-1];
+  const detail = document.getElementById('overallChartDetail');
+  if(!hasEntries){
+    document.getElementById('overallChart').innerHTML = '<div class="empty">Add your first expense to bring this graph to life.</div>';
+    detail.innerHTML = '<p>Each bar will represent one month of recorded expenses.</p>';
+    return;
+  }
+  const containerWidth = document.getElementById('overallChart').clientWidth || 320;
+  const width = series.length>6 ? series.length*68+64 : Math.max(240,containerWidth);
+  const height=264,left=58,right=12,top=20,bottom=64;
+  const plotHeight=height-top-bottom,step=(width-left-right)/series.length;
+  const values=series.map(m=>overallGraphMode==='cumulative'?m.cumulative:m.total);
+  const maximum=Math.max(1,...values);
+  const lines=[0,.5,1].map(ratio=>{
+    const y=top+plotHeight*(1-ratio);
+    return `<line x1="${left}" y1="${y}" x2="${width-right}" y2="${y}" stroke="var(--border)"/><text x="${left-8}" y="${y+4}" text-anchor="end">${axisMoney(maximum*ratio)}</text>`;
+  }).join('');
+  const bars=series.map((month,i)=>{
+    const x=left+i*step+step*.2,barWidth=step*.6,barHeight=values[i]/maximum*plotHeight;
+    const y=top+plotHeight-barHeight,selectedMonth=month.key===overallSelectedMonth;
+    const [year,m]=month.key.split('-').map(Number);
+    const label=new Date(year,m-1,1).toLocaleString('en-IN',{month:'short'});
+    return `<g role="button" tabindex="0" data-chart-month="${month.key}" aria-pressed="${selectedMonth}" aria-label="${monthLabel(month.key)}: ${fmt(values[i])}${overallGraphMode==='cumulative'?' running total':''}, ${month.count} entries">
+      <title>${monthLabel(month.key)} · ${fmt(values[i])}</title>
+      <rect x="${left+i*step}" y="${top}" width="${step}" height="${plotHeight+54}" fill="transparent"/>
+      <rect class="chart-bar" x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" rx="5"/>
+      <text x="${x+barWidth/2}" y="${top+plotHeight+22}" text-anchor="middle">${label}</text>
+      <text x="${x+barWidth/2}" y="${top+plotHeight+39}" text-anchor="middle">${year}</text>
+    </g>`;
+  }).join('');
+  document.getElementById('overallChart').innerHTML = `<svg class="spend-chart" style="${series.length>6?`min-width:${width}px`:''}" viewBox="0 0 ${width} ${height}" role="group" aria-label="${overallGraphMode==='cumulative'?'Cumulative':'Monthly'} recorded spending graph">${lines}${bars}</svg>`;
+  detail.innerHTML = `<div><strong>${monthLabel(selected.key)} · ${fmt(overallGraphMode==='cumulative'?selected.cumulative:selected.total)}</strong><p>${overallGraphMode==='cumulative'?'Recorded running total through this month. ':''}${selected.count} ${selected.count===1?'expense':'expenses'} logged in this month.</p></div><button type="button" class="btn secondary small" id="openOverallMonth">Open month</button>`;
+  const container=document.getElementById('overallChart');
+  container.querySelectorAll('[data-chart-month]').forEach(bar=>{
+    bar.addEventListener('click',()=>{
+      const scrollLeft=container.scrollLeft;
+      overallSelectedMonth=bar.dataset.chartMonth;
+      renderOverallChart(series,true);
+      container.scrollLeft=scrollLeft;
+      container.querySelector(`[data-chart-month="${overallSelectedMonth}"]`).focus({preventScroll:true});
+    });
+    bar.addEventListener('keydown',event=>{
+      if(event.key==='Enter' || event.key===' '){event.preventDefault();bar.dispatchEvent(new MouseEvent('click'));}
+    });
+  });
+  document.getElementById('openOverallMonth').addEventListener('click',()=>{
+    currentMonth=selected.key;
+    expandedCategory=null;
+    document.querySelector('[data-tab="overview"]').click();
+    scrollTo({top:0,behavior:'auto'});
+  });
+}
+
+function renderSwapGame(){
+  const amount=Number(document.getElementById('dailySwap').value);
+  document.getElementById('dailySwapValue').textContent=fmt(amount);
+  document.getElementById('swapResult').innerHTML=`<div><strong>${fmt(amount*30)}</strong><span>over 30 days</span></div><div><strong>${fmt(amount*365)}</strong><span>over 365 days</span></div>`;
+}
+document.getElementById('dailySwap').addEventListener('input',renderSwapGame);
+document.querySelectorAll('[data-graph-mode]').forEach(button=>button.addEventListener('click',()=>{
+  overallGraphMode=button.dataset.graphMode;
+  renderOverall();
+}));
+document.getElementById('overallLogBtn').addEventListener('click',()=>{
+  document.querySelector('[data-tab="add"]').click();
+  scrollTo({top:0,behavior:'auto'});
+});
+let observedChartWidth = 0;
+new ResizeObserver(observations=>{
+  const width = Math.round(observations[0].contentRect.width);
+  if(width>0 && width!==observedChartWidth){
+    observedChartWidth = width;
+    renderOverallChart(monthSeries(state.entries),state.entries.length>0);
+  }
+}).observe(document.getElementById('overallChart'));
 
 function renderOverview(){
   document.getElementById('overviewMonthLabel').textContent = monthLabel(currentMonth);
@@ -1148,6 +1429,7 @@ function renderOverview(){
   renderHeatmap(entries, y, m);
   renderReminderBanner();
   renderMonthlyTotals();
+  renderOverall();
 }
 
 function renderInsights(entries, total, prevMonthKey){

@@ -99,7 +99,7 @@ test('legacy reproduction: split paise fail native validation and missing backup
 test('sample exploration, profile creation and entry gating work without Budget or Plan',async()=>{
   const {context,page,errors}=await setup(null);
   try{
-    assert.deepEqual(await page.locator('.tab-btn').allTextContents(),['Overview','Add Entry','Entries']);
+    assert.deepEqual(await page.locator('.tab-btn').allTextContents(),['Overview','Overall','Add Entry','Entries']);
     assert.equal(await page.locator('#tab-budget,#tab-plan').count(),0);
     await add(page);
     assert.equal(await page.locator('#authCreate').isVisible(),true);
@@ -310,7 +310,7 @@ test('mobile and laptop layouts have no horizontal overflow in light or dark mod
   try{
     for(const width of [320,375,390,768,1440]){
       await page.setViewportSize({width,height:844});
-      for(const tab of ['overview','add','entries']){
+      for(const tab of ['overview','overall','add','entries']){
         await page.click(`[data-tab="${tab}"]`);
         const dimensions=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,width:innerWidth}));
         assert.ok(dimensions.scroll<=dimensions.width,`${width}px ${tab}: ${JSON.stringify(dimensions)}`);
@@ -322,6 +322,119 @@ test('mobile and laptop layouts have no horizontal overflow in light or dark mod
     await page.screenshot({path:path.join(root,'test-results','overview-mobile.png'),fullPage:true,animations:'disabled'});
     await page.setViewportSize({width:1440,height:1000});
     await page.screenshot({path:path.join(root,'test-results','overview-desktop.png'),fullPage:true,animations:'disabled'});
+    await page.click('[data-tab="overall"]');await page.setViewportSize({width:390,height:844});
+    await page.waitForFunction(()=>{
+      const svg=document.querySelector('#overallChart svg');
+      return svg.getBoundingClientRect().width/svg.viewBox.baseVal.width>.95;
+    });
+    await page.evaluate(()=>scrollTo(0,0));
+    await page.screenshot({path:path.join(root,'test-results','overall-mobile.png'),fullPage:true,animations:'disabled'});
+    assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+});
+
+test('Overall combines all months and category totals independent of the Overview month',async()=>{
+  const {context,page,errors}=await setup();
+  try{
+    await page.click('[data-month="2026-08"]');
+    await page.click('[data-tab="overall"]');
+    assert.match(await page.locator('#overallSummary .value').innerText(),/₹3,246.3/);
+    assert.match(await page.locator('#overallSummary').innerText(),/3[\s\S]*months with entries/);
+    assert.match(await page.locator('#overallSummary').innerText(),/7[\s\S]*expenses recorded/);
+    assert.match(await page.locator('#overallSummary').innerText(),/₹1,082.1[\s\S]*average per logged month/);
+    assert.match(await page.locator('#overallCategories').innerText(),/Food[\s\S]*₹1,246.3/);
+    assert.match(await page.locator('#overallCategories').innerText(),/Sports[\s\S]*₹2,000/);
+    await page.locator('[data-overall-category="Food"]').click();
+    assert.match(await page.locator('#overallCategories .cat-detail').innerText(),/₹1,246.3/);
+    assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+});
+
+test('monthly and running-total graphs include missing months and support keyboard drill-down',async()=>{
+  const {context,page,errors}=await setup();
+  try{
+    await page.click('[data-tab="overall"]');
+    assert.equal(await page.locator('[data-chart-month]').count(),4);
+    assert.match(await page.locator('[data-chart-month="2026-09"]').getAttribute('aria-label'),/₹0/);
+    await page.click('[data-graph-mode="cumulative"]');
+    assert.match(await page.locator('[data-chart-month="2026-08"]').getAttribute('aria-label'),/₹806 running total/);
+    assert.match(await page.locator('[data-chart-month="2026-09"]').getAttribute('aria-label'),/₹806 running total/);
+    assert.match(await page.locator('[data-chart-month="2026-10"]').getAttribute('aria-label'),/₹1,006 running total/);
+    assert.match(await page.locator('[data-chart-month="2026-11"]').getAttribute('aria-label'),/₹3,246.3 running total/);
+    await page.locator('[data-chart-month="2026-10"]').focus();
+    await page.keyboard.press('Enter');
+    assert.match(await page.locator('#overallChartDetail').innerText(),/October 2026 · ₹1,006/);
+    await page.click('#openOverallMonth');
+    assert.equal(await page.locator('#overviewMonthLabel').innerText(),'October 2026');
+    assert.match(await page.locator('#overviewCards').innerText(),/₹200/);
+    assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+});
+
+test('Overall empty state, tracking badges and the swap game handle zero and never alter expenses',async()=>{
+  const {context,page,errors}=await setup({entries:[],nextId:1});
+  try{
+    const before=await getData(page);
+    await page.click('[data-tab="overall"]');
+    assert.equal(await page.locator('#overallSummary .value').innerText(),'₹0');
+    assert.equal(await page.locator('.habit-badge.earned').count(),0);
+    assert.match(await page.locator('#overallChart').innerText(),/first expense/);
+    assert.ok(!(await page.locator('#tab-overall').innerText()).match(/NaN|Infinity|undefined/));
+    await page.locator('#dailySwap').fill('100');
+    assert.equal(await page.locator('#dailySwapValue').innerText(),'₹100');
+    assert.match(await page.locator('#swapResult').innerText(),/₹3,000[\s\S]*₹36,500/);
+    await page.locator('#dailySwap').fill('0');
+    assert.match(await page.locator('#swapResult').innerText(),/₹0/);
+    assert.deepEqual(await getData(page),before);
+    await page.click('#overallLogBtn');await page.fill('#fAmount','125');await page.click('#submitBtn');
+    await page.click('[data-tab="overall"]');
+    assert.equal(await page.locator('.habit-badge.earned').count(),1);
+    assert.match(await page.locator('#overallSummary .value').innerText(),/₹125/);
+    assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+});
+
+test('tracking streaks use local dates across month boundaries and exclude future entries',async()=>{
+  const data={entries:['2026-10-30','2026-10-31','2026-11-01','2026-11-22','2026-11-23','2026-11-24'].map((date,i)=>entry(i+1,date,10)),nextId:20};
+  const {context,page,errors}=await setup(data);
+  try{
+    await page.click('[data-tab="overall"]');
+    assert.match(await page.locator('#habitProgress').innerText(),/5 days journaled/);
+    assert.match(await page.locator('#habitProgress').innerText(),/Current logging streak: 2 days · Best: 3 days/);
+    await page.clock.setFixedTime(new Date('2026-11-27T06:30:00Z'));await page.reload();
+    await page.click('[data-tab="overall"]');
+    assert.match(await page.locator('#habitProgress').innerText(),/Current logging streak: 0 days/);
+    assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+});
+
+test('Overall updates after changes and resets selections and data on profile switch',async()=>{
+  const {context,page,errors}=await setup();
+  try{
+    await add(page,{amount:'50'});await page.click('[data-tab="overall"]');
+    assert.equal(await page.locator('#overallSummary .value').innerText(),'₹3,296.3');
+    await page.click('[data-graph-mode="cumulative"]');
+    await page.locator('[data-overall-category="Sports"]').click();
+    await page.click('#lockBtn');
+    await page.click('[data-tab="overall"]');
+    assert.equal(await page.locator('[data-graph-mode="monthly"]').getAttribute('aria-pressed'),'true');
+    assert.equal(await page.locator('#overallSummary .value').innerText(),'₹4,629');
+    assert.equal(await page.locator('[data-overall-category][aria-expanded="true"]').count(),0);
+    assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+});
+
+test('Overall graph scrolls within mobile bounds across years and safely renders custom categories',async()=>{
+  const label='<img src=x onerror="window.bad=1">';
+  const data={entries:[entry(1,'2024-01-01',1234,label,'<script>bad()</script>'),entry(2,'2026-11-23',99)],nextId:3};
+  const {context,page,errors}=await setup(data);
+  try{
+    await page.setViewportSize({width:320,height:844});await page.click('[data-tab="overall"]');
+    assert.equal(await page.locator('[data-chart-month]').count(),35);
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+    assert.equal(await page.locator('#tab-overall img,#tab-overall script').count(),0);
+    await page.click('[data-graph-mode="cumulative"]');
+    assert.match(await page.locator('[data-chart-month="2026-11"]').getAttribute('aria-label'),/₹1,333/);
     assert.deepEqual(errors,[]);
   }finally{await context.close();}
 });
