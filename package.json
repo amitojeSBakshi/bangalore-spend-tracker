@@ -1,0 +1,11 @@
+{
+  "name": "spend-tracker",
+  "private": true,
+  "version": "1.1.0",
+  "scripts": {
+    "test": "node --test tests/tracker.test.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.65.1"
+  }
+}

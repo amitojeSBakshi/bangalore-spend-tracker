@@ -1,7 +1,7 @@
 {
   "name": "Spend Tracker",
   "short_name": "Spend Tracker",
-  "description": "Daily spend tracker with category breakdown, forecast, and budgeting.",
+  "description": "Track daily expenses, compare monthly totals, and understand your spending.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
