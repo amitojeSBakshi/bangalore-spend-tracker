@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spend-tracker-v3-2026-11-23-overall';
+const CACHE_NAME = 'spend-tracker-v4-2026-11-24-quick-add';
 const SHELL_FILES = [
   './',
   './index.html',

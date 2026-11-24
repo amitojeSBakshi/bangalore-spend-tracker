@@ -66,7 +66,9 @@ async function getData(page){return page.evaluate(k=>JSON.parse(localStorage.get
 async function add(page,{date='2026-11-23',amount='150',note='Lunch',category='Food'}={}){
   await page.click('[data-tab="add"]');
   await page.fill('#fDate',date);await page.fill('#fAmount',amount);
-  await page.selectOption('#fCategory',category);await page.fill('#fNote',note);
+  if(await page.locator('#categoryChips').count()) await page.locator(`[data-entry-category="${category}"]`).click();
+  else await page.selectOption('#fCategory',category);
+  await page.fill('#fNote',note);
   await page.click('#submitBtn');
 }
 async function importData(page,data){
@@ -76,10 +78,15 @@ async function importData(page,data){
   await page.setInputFiles('#importFile',{name:'test-backup.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
   await page.waitForFunction(()=>document.getElementById('importFile').value==='');
   // FileReader dispatches after the input event has returned.
-  await page.waitForFunction(()=>document.getElementById('monthlyTotals').children.length>0);
+  await page.waitForFunction(()=>document.getElementById('overviewCards').children.length>0);
   await page.evaluate(()=>new Promise(resolve=>setTimeout(resolve,100)));
   page.off('dialog',handler);
   return dialogs;
+}
+async function openMonth(page,key){
+  await page.click('[data-tab="overall"]');
+  await page.locator(`[data-chart-month="${key}"]`).dispatchEvent('click');
+  await page.click('#openOverallMonth');
 }
 
 test('legacy reproduction: split paise fail native validation and missing backup fields crash boot',async()=>{
@@ -99,7 +106,7 @@ test('legacy reproduction: split paise fail native validation and missing backup
 test('sample exploration, profile creation and entry gating work without Budget or Plan',async()=>{
   const {context,page,errors}=await setup(null);
   try{
-    assert.deepEqual(await page.locator('.tab-btn').allTextContents(),['Overview','Overall','Add Entry','Entries']);
+    assert.deepEqual(await page.locator('.tab-btn').allTextContents(),['Monthly','Money Story','Quick Add','Entries']);
     assert.equal(await page.locator('#tab-budget,#tab-plan').count(),0);
     await add(page);
     assert.equal(await page.locator('#authCreate').isVisible(),true);
@@ -116,19 +123,20 @@ test('sample exploration, profile creation and entry gating work without Budget 
   }finally{await context.close();}
 });
 
-test('all months have exact totals, missing months show zero, and months are selectable',async()=>{
+test('monthly list is removed while Money Story retains accurate selectable monthly graph totals',async()=>{
   const {context,page,errors}=await setup();
   try{
-    const totals=await page.locator('.month-total').allTextContents();
-    assert.match(totals[0],/November 2026[\s\S]*₹2,240.3/);
-    assert.match(totals[1],/October 2026[\s\S]*₹200/);
-    assert.match(totals[2],/September 2026[\s\S]*₹0/);
-    assert.match(totals[3],/August 2026[\s\S]*₹806/);
-    assert.match(await page.locator('#allTimeTotal').innerText(),/₹3,246.3/);
-    await page.click('[data-month="2026-08"]');
+    assert.equal(await page.locator('#monthlyTotalsPanel').count(),0);
+    await page.click('[data-tab="overall"]');
+    assert.match(await page.locator('[data-chart-month="2026-11"]').getAttribute('aria-label'),/₹2,240.3/);
+    assert.match(await page.locator('[data-chart-month="2026-10"]').getAttribute('aria-label'),/₹200/);
+    assert.match(await page.locator('[data-chart-month="2026-09"]').getAttribute('aria-label'),/₹0/);
+    assert.match(await page.locator('[data-chart-month="2026-08"]').getAttribute('aria-label'),/₹806/);
+    assert.equal(await page.locator('#overallSummary .value').innerText(),'₹3,246.3');
+    await openMonth(page,'2026-08');
     assert.equal(await page.locator('#overviewMonthLabel').innerText(),'August 2026');
     assert.match(await page.locator('#overviewCards').innerText(),/₹806/);
-    await page.click('[data-month="2026-09"]');
+    await openMonth(page,'2026-09');
     assert.match(await page.locator('#overviewCards').innerText(),/₹0/);
     assert.deepEqual(errors,[]);
   }finally{await context.close();}
@@ -137,7 +145,7 @@ test('all months have exact totals, missing months show zero, and months are sel
 test('November additions select the right month, edit/delete update totals and reload retains history',async()=>{
   const {context,page,errors}=await setup();
   try{
-    await page.click('[data-month="2026-08"]');
+    await openMonth(page,'2026-08');
     await add(page,{date:'2026-11-24',amount:'149.25'});
     await page.click('[data-tab="overview"]');
     assert.equal(await page.locator('#overviewMonthLabel').innerText(),'November 2026');
@@ -178,6 +186,7 @@ test('split bills accept decimal shares and a following unsplit entry still save
   const {context,page,errors}=await setup();
   try{
     await page.click('[data-tab="add"]');await page.fill('#fDate','2026-11-23');
+    await page.locator('#entryDetails summary').click();
     await page.check('#fSplitToggle');await page.fill('#fSplitTotal','1000');await page.fill('#fSplitCount','3');
     assert.equal(await page.inputValue('#fAmount'),'333.33');
     assert.equal(await page.$eval('#entryForm',el=>el.checkValidity()),true);
@@ -329,6 +338,133 @@ test('mobile and laptop layouts have no horizontal overflow in light or dark mod
     });
     await page.evaluate(()=>scrollTo(0,0));
     await page.screenshot({path:path.join(root,'test-results','overall-mobile.png'),fullPage:true,animations:'disabled'});
+    await page.click('[data-tab="add"]');await page.evaluate(()=>scrollTo(0,0));
+    await page.screenshot({path:path.join(root,'test-results','quick-add-mobile.png'),fullPage:true,animations:'disabled'});
+    assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+});
+
+test('Quick Add supports amount-only saving, category/amount/date chips, retained context and Undo',async()=>{
+  const {context,page,errors}=await setup();
+  try{
+    const before=await getData(page);
+    await page.click('[data-tab="add"]');
+    assert.equal(await page.locator('#entryDetails').getAttribute('open'),null);
+    await page.evaluate(()=>scrollTo(0,0));
+    assert.ok(await page.$eval('#submitBtn',button=>button.getBoundingClientRect().bottom<=innerHeight),'Save remains reachable on mobile');
+    await page.click('[data-amount="150"]');
+    await page.click('[data-entry-category="Transport"]');
+    await page.click('#entryYesterday');
+    assert.equal(await page.inputValue('#fDate'),'2026-11-22');
+    assert.equal(await page.locator('#submitBtn').innerText(),'Save ₹150');
+    await page.click('#submitBtn');
+    let saved=await getData(page);
+    assert.equal(saved.entries.at(-1).amount,150);
+    assert.equal(saved.entries.at(-1).category,'Transport');
+    assert.equal(saved.entries.at(-1).date,'2026-11-22');
+    assert.equal(saved.entries.at(-1).note,'');
+    assert.equal(await page.inputValue('#fDate'),'2026-11-22');
+    assert.equal(await page.inputValue('#fCategory'),'Transport');
+    assert.equal(await page.inputValue('#fAmount'),'');
+    assert.equal(await page.locator('#undoLastAdd').isVisible(),true);
+    await page.click('#undoLastAdd');
+    assert.deepEqual((await getData(page)).entries,before.entries);
+    await page.click('#entryToday');await page.fill('#fAmount','20.50');await page.press('#fAmount','Enter');
+    assert.equal((await getData(page)).entries.at(-1).date,'2026-11-23');
+    assert.equal((await getData(page)).entries.at(-1).amount,20.5);
+    assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+});
+
+test('recent single expenses can be repeated once without a double-tap duplicate and undone',async()=>{
+  const {context,page,errors}=await setup({entries:[entry(1,'2026-11-23',80,'Food','')],nextId:2});
+  try{
+    await page.click('[data-tab="add"]');
+    assert.equal(await page.locator('#quickAdds .quick-add-btn').count(),1);
+    await page.locator('#quickAdds .quick-add-btn').dblclick();
+    assert.equal((await getData(page)).entries.length,2);
+    await page.click('#undoLastAdd');
+    assert.equal((await getData(page)).entries.length,1);
+    await page.click('#lockBtn');
+    assert.equal(await page.locator('#undoLastAdd').isVisible(),false);
+    assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+});
+
+test('Other category is quick to reuse without adding it to permanent category choices',async()=>{
+  const {context,page,errors}=await setup();
+  try{
+    await page.click('[data-tab="add"]');
+    await page.click('[data-entry-category="__other__"]');
+    await page.fill('#fCustomCategory','Pets');await page.fill('#fAmount','100');await page.click('#submitBtn');
+    assert.equal(await page.inputValue('#fCustomCategory'),'Pets');
+    assert.equal((await getData(page)).entries.at(-1).category,'Pets');
+    assert.equal(await page.locator('#categoryChips').innerText().then(t=>t.includes('Pets')),false);
+    await page.fill('#fAmount','50');await page.click('#submitBtn');
+    assert.equal((await getData(page)).entries.at(-1).category,'Pets');
+    assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+});
+
+async function chooseDates(page,start,end){
+  await page.click('[data-tab="overall"]');
+  if(!await page.$eval('#storyRangePanel',el=>el.open)) await page.locator('#storyRangePanel summary').click();
+  await page.fill('#storyStart',start);await page.fill('#storyEnd',end);
+  await page.locator('#storyRangeForm button[type="submit"]').click();
+}
+test('Money Story defaults to first and last entries and custom dates filter totals/categories/graphs inclusively',async()=>{
+  const {context,page,errors}=await setup();
+  try{
+    const before=await getData(page);
+    await page.click('[data-tab="overall"]');
+    assert.match(await page.locator('#overallSummary').innerText(),/3 Aug 2026 – 23 Nov 2026/);
+    await chooseDates(page,'2026-11-01','2026-11-02');
+    assert.equal(await page.locator('#overallSummary .value').innerText(),'₹2,100');
+    assert.match(await page.locator('#overallSummary').innerText(),/2[\s\S]*expenses recorded/);
+    assert.match(await page.locator('#overallCategories').innerText(),/Food[\s\S]*₹100/);
+    assert.equal(await page.locator('[data-chart-month]').count(),1);
+    assert.match(await page.locator('[data-chart-month="2026-11"]').getAttribute('aria-label'),/₹2,100/);
+    await page.click('[data-graph-mode="cumulative"]');
+    assert.match(await page.locator('[data-chart-month="2026-11"]').getAttribute('aria-label'),/₹2,100 running total/);
+    await page.setViewportSize({width:320,height:844});
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+    assert.match(await page.locator('#overallChartDetail').innerText(),/chosen dates/);
+    assert.equal(await page.locator('#openOverallMonth').innerText(),'Open full month');
+    assert.deepEqual(await getData(page),before);
+    assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+});
+
+test('date ranges reject reversed dates, handle empty and one-sided dates and reset to dynamic defaults',async()=>{
+  const {context,page,errors}=await setup();
+  try{
+    await chooseDates(page,'2026-11-23','2026-08-03');
+    assert.equal(await page.locator('#storyRangeError').isVisible(),true);
+    assert.equal(await page.locator('#overallSummary .value').innerText(),'₹3,246.3');
+    await chooseDates(page,'2026-09-01','2026-09-30');
+    assert.equal(await page.locator('#overallSummary .value').innerText(),'₹0');
+    assert.match(await page.locator('#overallChart').innerText(),/No expenses in this range/);
+    await chooseDates(page,'2026-11-02','');
+    assert.equal(await page.locator('#overallSummary .value').innerText(),'₹2,140.3');
+    await chooseDates(page,'','2026-10-31');
+    assert.equal(await page.locator('#overallSummary .value').innerText(),'₹1,006');
+    await page.locator('#storyRangePanel summary').click();await page.click('#resetStoryRange');
+    assert.equal(await page.locator('#overallSummary .value').innerText(),'₹3,246.3');
+    await add(page,{date:'2026-12-01',amount:'100'});await page.click('[data-tab="overall"]');
+    assert.match(await page.locator('#overallSummary').innerText(),/3 Aug 2026 – 1 Dec 2026/);
+    assert.equal(await page.locator('#overallSummary .value').innerText(),'₹3,346.3');
+    assert.deepEqual(errors,[]);
+  }finally{await context.close();}
+});
+
+test('custom ranges and draft form state are isolated between profiles',async()=>{
+  const {context,page,errors}=await setup();
+  try{
+    await chooseDates(page,'2026-11-01','2026-11-02');
+    await page.click('#lockBtn');await page.click('[data-tab="overall"]');
+    assert.equal(await page.locator('#overallSummary .value').innerText(),'₹4,629');
+    assert.match(await page.locator('#storyRangeLabel').innerText(),/Automatic/);
+    assert.equal(await page.inputValue('#editId'),'');
     assert.deepEqual(errors,[]);
   }finally{await context.close();}
 });
@@ -336,7 +472,7 @@ test('mobile and laptop layouts have no horizontal overflow in light or dark mod
 test('Overall combines all months and category totals independent of the Overview month',async()=>{
   const {context,page,errors}=await setup();
   try{
-    await page.click('[data-month="2026-08"]');
+    await openMonth(page,'2026-08');
     await page.click('[data-tab="overall"]');
     assert.match(await page.locator('#overallSummary .value').innerText(),/₹3,246.3/);
     assert.match(await page.locator('#overallSummary').innerText(),/3[\s\S]*months with entries/);
@@ -371,7 +507,7 @@ test('monthly and running-total graphs include missing months and support keyboa
   }finally{await context.close();}
 });
 
-test('Overall empty state, tracking badges and the swap game handle zero and never alter expenses',async()=>{
+test('Money Story empty state and tracking badges work with the saving game removed',async()=>{
   const {context,page,errors}=await setup({entries:[],nextId:1});
   try{
     const before=await getData(page);
@@ -380,11 +516,7 @@ test('Overall empty state, tracking badges and the swap game handle zero and nev
     assert.equal(await page.locator('.habit-badge.earned').count(),0);
     assert.match(await page.locator('#overallChart').innerText(),/first expense/);
     assert.ok(!(await page.locator('#tab-overall').innerText()).match(/NaN|Infinity|undefined/));
-    await page.locator('#dailySwap').fill('100');
-    assert.equal(await page.locator('#dailySwapValue').innerText(),'₹100');
-    assert.match(await page.locator('#swapResult').innerText(),/₹3,000[\s\S]*₹36,500/);
-    await page.locator('#dailySwap').fill('0');
-    assert.match(await page.locator('#swapResult').innerText(),/₹0/);
+    assert.equal(await page.locator('#dailySwap,#swapResult').count(),0);
     assert.deepEqual(await getData(page),before);
     await page.click('#overallLogBtn');await page.fill('#fAmount','125');await page.click('#submitBtn');
     await page.click('[data-tab="overall"]');
@@ -450,7 +582,7 @@ test('old service workers update automatically, preserve saved data/other caches
       // The previous page's controllerchange handler deliberately reloads during this call.
       if(!error.message.includes('Execution context was destroyed')) throw error;
     });
-    await page.waitForSelector('#monthlyTotals');
+    await page.waitForSelector('#categoryChips',{state:'attached'});
     assert.deepEqual(await getData(page),fixture());
     assert.ok((await page.evaluate(()=>caches.keys())).includes('another-app-cache'));
     await context.setOffline(true);await page.goto(url+'/?offline-test=1');

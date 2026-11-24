@@ -167,13 +167,6 @@
   .entry-row .cat-pill{max-width:100%; overflow-wrap:anywhere; white-space:normal;}
   .entry-row .note{min-width:60px;}
   .field-error{color:var(--bad); font-size:13px; margin:12px 0 0;}
-  .monthly-summary{display:flex; flex-direction:column; gap:6px;}
-  .month-total{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:5px 12px; width:100%; padding:12px; text-align:left; font:inherit; color:var(--text); background:var(--panel2); border:1px solid transparent; border-radius:8px; cursor:pointer;}
-  .month-total[aria-current="true"]{border-color:var(--accent);}
-  .month-total:hover{border-color:var(--accent);}
-  .month-total .amount{font-family:"IBM Plex Mono",monospace; font-size:14px; overflow-wrap:anywhere;}
-  .month-total .count{font-size:12px; color:var(--muted);}
-  .monthly-grand-total{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:12px; margin-top:12px; font-weight:600;}
   .heatmap-weekdays{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); text-align:center; font-size:11px; color:var(--muted); margin-bottom:6px;}
   .overall-intro{margin-bottom:18px;}
   .overall-intro h2{font:600 25px "Fraunces",Georgia,serif; margin:0 0 6px;}
@@ -215,15 +208,42 @@
   .habit-badge span{display:block; margin-top:4px; font-size:12px; color:var(--muted); line-height:1.4;}
   .habit-badge .badge-status{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:6px;}
   .habit-badge.earned .badge-status{color:var(--good);}
-  .swap-control{display:flex; gap:10px; align-items:center; margin:14px 0;}
-  .swap-control input{padding:0; accent-color:var(--accent); cursor:pointer;}
-  .swap-control output{min-width:68px; text-align:right; font-family:"IBM Plex Mono",monospace;}
-  .swap-result{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;}
-  .swap-result div{padding:12px; background:var(--panel2); border-radius:8px;}
-  .swap-result strong{display:block; font-family:"IBM Plex Mono",monospace; color:var(--accent); font-size:18px;}
-  .swap-result span{font-size:12px; color:var(--muted);}
   button:focus-visible,[role="button"]:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
-  @media(max-width:420px){nav.tabs{padding:0 12px;} nav.tabs button{padding:12px 9px 11px; font-size:13px;}}
+  .story-range summary,.entry-details summary{cursor:pointer; font-size:13px; font-weight:600; color:var(--text);}
+  .story-range summary span{display:block; margin:6px 0 0 16px; font-size:12px; font-weight:400; color:var(--muted);}
+  .story-range[open] summary{color:var(--accent);}
+  .amount-input{display:flex; align-items:center; gap:8px; padding:12px 16px; background:var(--panel2); border:1px solid var(--border); border-radius:12px;}
+  .amount-input > span{font-size:28px; color:var(--accent);}
+  .amount-input #fAmount{border:0; background:transparent; padding:0; font-size:38px; min-width:0; box-shadow:none;}
+  .amount-input:focus-within{border-color:var(--accent); outline:2px solid var(--accent);}
+  .amount-input #fAmount:focus{outline:none;}
+  .amount-presets,.date-presets{display:flex; gap:6px; flex-wrap:wrap;}
+  .amount-presets{margin-top:10px;}
+  .amount-presets button,.date-presets button{padding:8px 11px; background:var(--panel2); border:1px solid var(--border); border-radius:8px; font:inherit; font-size:12px; color:var(--text); cursor:pointer; min-height:38px;}
+  .date-presets button[aria-pressed="true"],.amount-presets button[aria-pressed="true"]{border-color:var(--accent); color:var(--accent);}
+  .category-chips{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px;}
+  .category-chip{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-width:0; min-height:64px; padding:8px 3px; background:var(--panel2); border:1px solid var(--border); border-radius:9px; cursor:pointer; color:var(--muted); font:inherit;}
+  .category-chip .category-icon{font-size:21px; line-height:1;}
+  .category-chip .category-label{font-size:10.5px; overflow-wrap:anywhere; max-width:100%;}
+  .category-chip[aria-pressed="true"]{border-color:var(--accent); color:var(--text); background:var(--warn-bg);}
+  .quick-date-row{display:flex; flex-wrap:wrap; align-items:end; gap:10px;}
+  .date-picker{flex:1; min-width:145px;}
+  .date-picker label{font-size:11px;}
+  .date-picker input{padding:8px;}
+  .entry-details{padding:12px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border);}
+  .entry-extras{display:grid; gap:12px; padding-top:16px;}
+  #submitBtn{flex:1; min-height:46px;}
+  .save-feedback{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:12px 0; font-size:13px; color:var(--good);}
+  #lastAdded:not(:empty){padding:10px 12px; border-radius:8px; background:var(--good-bg); flex:1; min-width:170px; overflow-wrap:anywhere;}
+  .date-spend{font-size:12px; color:var(--muted); line-height:1.5; padding:4px 0 12px;}
+  .repeat-heading{font-size:12px; color:var(--muted); margin:0 0 8px;}
+  .quick-add-btn{max-width:100%; white-space:normal; overflow-wrap:anywhere; text-align:left;}
+  .quick-add-btn:active,.category-chip:active,.amount-presets button:active{transform:scale(.97);}
+  .panel{transition:border-color .15s ease;}
+  .panel:focus-within{border-color:var(--accent);}
+  @media(max-width:420px){nav.tabs button{flex:1; padding:12px 7px 11px; font-size:12px;}}
+  @media(max-width:640px){.entry-actions{position:sticky; bottom:calc(env(safe-area-inset-bottom) + 8px); z-index:4; background:var(--panel); padding:8px 0; border-top:1px solid var(--border);}}
+  @media(max-width:420px){nav.tabs{padding:0 12px;} nav.tabs button{padding:12px 7px 11px; font-size:12px;}}
 
   .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
   .toolbar{justify-content:space-between; margin-bottom:14px;}
@@ -452,14 +472,14 @@
         </button>
       </div>
     </div>
-    <div class="tag">Log it once. See where it goes.</div>
+    <div class="tag">Less guessing. More living.</div>
     <div id="dataStatus"></div>
   </header>
 
   <nav class="tabs">
-    <button class="tab-btn active" data-tab="overview">Overview</button>
-    <button class="tab-btn" data-tab="overall">Overall</button>
-    <button class="tab-btn" data-tab="add">Add Entry</button>
+    <button class="tab-btn active" data-tab="overview">Monthly</button>
+    <button class="tab-btn" data-tab="overall">Money Story</button>
+    <button class="tab-btn" data-tab="add">Quick Add</button>
     <button class="tab-btn" data-tab="entries">Entries</button>
   </nav>
 
@@ -467,6 +487,7 @@
 
     <!-- OVERVIEW -->
     <div class="view active" id="tab-overview">
+      <div class="overall-intro"><h2>Your monthly snapshot</h2><p>Small entries. A clearer picture.</p></div>
       <div class="month-switch">
         <button id="prevMonth" aria-label="Previous month">‹</button>
         <div class="label" id="overviewMonthLabel"></div>
@@ -476,13 +497,6 @@
       <div class="cards" id="overviewCards"></div>
       <div class="saved-note" id="savedNote"></div>
       <div id="reminderBanner"></div>
-
-      <div class="panel" id="monthlyTotalsPanel">
-        <h3>All monthly expenses</h3>
-        <div class="saved-note" style="text-align:left;margin-bottom:12px;">Choose a month to see its breakdown.</div>
-        <div id="monthlyTotals" class="monthly-summary"></div>
-        <div id="allTimeTotal" class="monthly-grand-total"></div>
-      </div>
 
       <div class="panel" id="insightsPanel" style="display:none;">
         <h3>Insights</h3>
@@ -518,6 +532,16 @@
         <h2>Your money story</h2>
         <p>Every month, one big picture. Explore where it all went.</p>
       </div>
+      <details class="panel story-range" id="storyRangePanel">
+        <summary>Choose dates <span id="storyRangeLabel">All entries</span></summary>
+        <form id="storyRangeForm" class="entry-form" style="margin-top:16px;">
+          <div><label for="storyStart">From</label><input type="date" id="storyStart"></div>
+          <div><label for="storyEnd">To (included)</label><input type="date" id="storyEnd"></div>
+          <div class="full btn-row"><button class="btn small" type="submit">Apply dates</button><button class="btn secondary small" type="button" id="resetStoryRange">All entries</button></div>
+        </form>
+        <p class="overall-caption">Leave dates automatic to follow your first and latest entries.</p>
+        <p id="storyRangeError" class="field-error" role="alert" hidden></p>
+      </details>
       <div class="panel overall-hero" id="overallSummary"></div>
       <div class="panel">
         <h3>Your spending timeline</h3>
@@ -531,57 +555,50 @@
       </div>
       <div class="panel">
         <h3>Where it all goes</h3>
-        <p class="overall-caption">Categories across every month. Tap one to see the details.</p>
+        <p class="overall-caption">Categories within the dates shown above. Tap one to explore.</p>
         <div id="overallCategories"></div>
       </div>
       <div class="panel">
-        <h3>Your tracking wins</h3>
+        <h3 id="trackingWinsTitle">Your tracking wins</h3>
         <div id="moneyPersonality" class="money-personality"></div>
         <div id="habitProgress" class="habit-progress"></div>
         <div id="trackingBadges" class="badges"></div>
         <p class="overall-caption">Badges celebrate keeping a record. Log real expenses when they happen.</p>
-      </div>
-      <div class="panel">
-        <h3>The tiny-swap game</h3>
-        <p class="overall-caption">What could a small daily saving add up to? Move the slider to play.</p>
-        <label for="dailySwap" style="margin-top:12px;">Imagine setting aside this much each day</label>
-        <div class="swap-control">
-          <input type="range" id="dailySwap" min="0" max="500" step="10" value="50">
-          <output id="dailySwapValue" for="dailySwap">₹50</output>
-        </div>
-        <div class="swap-result" id="swapResult" aria-live="polite"></div>
-        <p class="overall-caption">A what-if calculation, with no investment returns assumed.</p>
       </div>
       <button type="button" class="btn" id="overallLogBtn">Log a real-life expense</button>
     </div>
 
     <!-- ADD ENTRY -->
     <div class="view" id="tab-add">
+      <div class="overall-intro"><h2>Log it. Get on with life.</h2><p>Amount, category, save. That's your whole routine.</p></div>
       <div id="quickAdds"></div>
       <div class="panel">
         <h3 id="addFormTitle">Add a spend</h3>
         <form class="entry-form" id="entryForm">
           <input type="hidden" id="editId">
-          <div>
-            <label for="fDate">Date</label>
-            <input type="date" id="fDate" required>
+          <div class="full fast-amount">
+            <label for="fAmount">How much?</label>
+            <div class="amount-input"><span aria-hidden="true">₹</span><input type="number" id="fAmount" min="0.01" step="0.01" placeholder="0" inputmode="decimal" enterkeyhint="done" autocomplete="off" required></div>
+            <div class="amount-presets" role="group" aria-label="Quick amounts"><button type="button" data-amount="50">₹50</button><button type="button" data-amount="100">₹100</button><button type="button" data-amount="150">₹150</button><button type="button" data-amount="200">₹200</button><button type="button" data-amount="500">₹500</button></div>
           </div>
-          <div>
-            <label for="fAmount">Amount (₹)</label>
-            <input type="number" id="fAmount" min="0.01" step="0.01" placeholder="0" inputmode="decimal" required>
-          </div>
-          <div>
-            <label for="fCategory">Category</label>
-            <select id="fCategory" required></select>
-          </div>
-          <div>
-            <label for="fNote">Note (optional)</label>
-            <input type="text" id="fNote" placeholder="e.g. lunch, bike petrol">
+          <div class="full">
+            <label id="categoryLabel">What was it for?</label>
+            <select id="fCategory" hidden aria-hidden="true" tabindex="-1"></select>
+            <div id="categoryChips" class="category-chips" role="group" aria-labelledby="categoryLabel"></div>
           </div>
           <div class="full" id="customCategoryWrap" style="display:none;">
             <label for="fCustomCategory">Custom category name</label>
             <input type="text" id="fCustomCategory" placeholder="e.g. Vet bill, Wedding gift">
           </div>
+          <div class="full quick-date-row">
+            <div class="date-presets" role="group" aria-label="Quick dates"><button type="button" id="entryToday">Today</button><button type="button" id="entryYesterday">Yesterday</button></div>
+            <div class="date-picker"><label for="fDate">Or choose a date</label><input type="date" id="fDate" required></div>
+          </div>
+          <div class="full">
+            <label for="fNote">Note (optional)</label>
+            <input type="text" id="fNote" placeholder="Lunch, a ride, a little treat…" autocomplete="off">
+          </div>
+          <details class="full entry-details" id="entryDetails"><summary>Tags &amp; split expenses</summary><div class="entry-extras">
           <div class="full">
             <label for="fTags">Tags (optional, comma separated)</label>
             <input type="text" id="fTags" placeholder="e.g. Goa trip, work">
@@ -605,14 +622,16 @@
             </div>
             <div class="lock-hint" style="text-align:left; margin-top:8px;">Only your share counts toward your totals. The amount above updates automatically.</div>
           </div>
-          <div class="full btn-row">
-            <button type="submit" class="btn" id="submitBtn">Add spend</button>
+          </div></details>
+          <div class="full btn-row entry-actions">
+            <button type="submit" class="btn" id="submitBtn">Save expense</button>
             <button type="button" class="btn secondary" id="cancelEdit" style="display:none;">Cancel edit</button>
           </div>
         </form>
         <p id="entryError" class="field-error" role="alert" hidden></p>
       </div>
-      <div class="tag" id="lastAdded" role="status"></div>
+      <div class="save-feedback"><div id="lastAdded" role="status" aria-live="polite"></div><button class="btn secondary small" id="undoLastAdd" type="button" hidden>Undo last add</button></div>
+      <div class="date-spend" id="entryDaySummary"></div>
     </div>
 
     <!-- ENTRIES -->
@@ -640,7 +659,7 @@
 </div>
 
 <script>
-const APP_RELEASE = 'spend-tracker-v3-2026-11-23-overall';
+const APP_RELEASE = 'spend-tracker-v4-2026-11-24-quick-add';
 if('serviceWorker' in navigator){
   const wasControlled = !!navigator.serviceWorker.controller;
   window.addEventListener('load', ()=>{
@@ -701,6 +720,7 @@ const CATEGORIES = [
   {id:'Misc', color:'var(--misc)'},
 ];
 const EXTRA_PALETTE = ['var(--extra1)','var(--extra2)','var(--extra3)','var(--extra4)','var(--extra5)'];
+const CATEGORY_ICONS = {Food:'🍽️',Transport:'🚲',Shopping:'🛍️',Fun:'🎟️',Sports:'🏸',Donation:'🤲',Gift:'🎁',Productive:'💻',Misc:'📌',__other__:'✍️'};
 
 function hashStr(s){
   let h = 5381;
@@ -1044,6 +1064,9 @@ let expandedCategory = null;
 let overallGraphMode = 'monthly';
 let overallSelectedMonth = null;
 let overallExpandedCategory = null;
+let storyRange = {start:null,end:null};
+let undoEntry = null;
+let lastRepeatAt = -Infinity;
 
 function resetViewState(){
   currentMonth = monthKey(todayStr());
@@ -1051,7 +1074,12 @@ function resetViewState(){
   overallGraphMode = 'monthly';
   overallSelectedMonth = null;
   overallExpandedCategory = null;
-  document.getElementById('dailySwap').value = '50';
+  storyRange = {start:null,end:null};
+  undoEntry = null;
+  lastRepeatAt = -Infinity;
+  document.getElementById('undoLastAdd').hidden = true;
+  document.getElementById('storyRangePanel').open = false;
+  document.getElementById('storyRangeError').hidden = true;
   document.getElementById('filterCategory').value = '';
   document.getElementById('searchNotes').value = '';
   document.getElementById('lastAdded').textContent = '';
@@ -1083,9 +1111,8 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     if(btn.dataset.tab==='overall') renderOverall();
     if(btn.dataset.tab==='add'){
       renderQuickAdds();
-      if(!document.getElementById('editId').value && !document.getElementById('fAmount').value){
-        document.getElementById('fDate').value = currentMonth===monthKey(todayStr()) ? todayStr() : `${currentMonth}-01`;
-      }
+      if(!document.getElementById('fDate').value) document.getElementById('fDate').value = todayStr();
+      syncFastEntry();
     }
   });
 });
@@ -1098,8 +1125,58 @@ function populateCategorySelects(){
 }
 document.getElementById('fCategory').addEventListener('change', (e)=>{
   document.getElementById('customCategoryWrap').style.display = e.target.value === '__other__' ? 'block' : 'none';
+  syncCategoryChips();
 });
 populateCategorySelects();
+
+function buildCategoryChips(){
+  const categories = [...CATEGORIES.map(c=>({id:c.id,label:c.id})),{id:'__other__',label:'Other'}];
+  document.getElementById('categoryChips').innerHTML = categories.map(c=>`<button type="button" class="category-chip" data-entry-category="${c.id}" aria-pressed="${c.id===document.getElementById('fCategory').value}"><span class="category-icon" aria-hidden="true">${CATEGORY_ICONS[c.id]}</span><span class="category-label">${c.label}</span></button>`).join('');
+  document.querySelectorAll('[data-entry-category]').forEach(button=>button.addEventListener('click',()=>{
+    const select = document.getElementById('fCategory');
+    select.value = button.dataset.entryCategory;
+    select.dispatchEvent(new Event('change'));
+    if(select.value==='__other__') document.getElementById('fCustomCategory').focus();
+  }));
+}
+function syncCategoryChips(){
+  document.querySelectorAll('[data-entry-category]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.entryCategory===document.getElementById('fCategory').value)));
+}
+function syncFastEntry(){
+  syncCategoryChips();
+  const date = document.getElementById('fDate').value;
+  const yesterday = new Date(todayStr()+'T12:00:00'); yesterday.setDate(yesterday.getDate()-1);
+  document.getElementById('entryToday').setAttribute('aria-pressed',String(date===todayStr()));
+  document.getElementById('entryYesterday').setAttribute('aria-pressed',String(date===localDateStr(yesterday)));
+  const amount = Number(document.getElementById('fAmount').value);
+  const editing = !!document.getElementById('editId').value;
+  document.getElementById('submitBtn').textContent = editing ? 'Save changes' : amount>0 && Number.isFinite(amount) ? `Save ${fmt(amount)}` : 'Save expense';
+  document.querySelectorAll('[data-amount]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.amount)===amount)));
+  const rows = state.entries.filter(e=>e.date===date);
+  const label = isValidDate(date) ? new Date(date+'T12:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : '';
+  document.getElementById('entryDaySummary').textContent = `${currentProfile?'Your':'Sample'} ${label} page: ${fmt(sumMoney(rows))} across ${rows.length} ${rows.length===1?'expense':'expenses'}.`;
+}
+buildCategoryChips();
+document.querySelectorAll('[data-amount]').forEach(button=>button.addEventListener('click',()=>{
+  document.getElementById('fAmount').value = button.dataset.amount;
+  syncFastEntry();
+}));
+document.getElementById('fAmount').addEventListener('input',syncFastEntry);
+document.getElementById('fDate').addEventListener('change',()=>{syncFastEntry();renderQuickAdds();});
+[['entryToday',0],['entryYesterday',-1]].forEach(([id,offset])=>document.getElementById(id).addEventListener('click',()=>{
+  const date = new Date(todayStr()+'T12:00:00'); date.setDate(date.getDate()+offset);
+  document.getElementById('fDate').value = localDateStr(date);
+  syncFastEntry(); renderQuickAdds();
+}));
+document.getElementById('undoLastAdd').addEventListener('click',()=>{
+  if(!undoEntry || undoEntry.key!==STORAGE_KEY || !requireProfile()) return;
+  if(!saveState({...state,entries:state.entries.filter(e=>e.id!==undoEntry.id)})) return;
+  undoEntry = null;
+  document.getElementById('undoLastAdd').hidden = true;
+  lastRepeatAt = -Infinity;
+  document.getElementById('lastAdded').textContent = 'Undone. That last expense was removed.';
+  renderOverview(); renderEntriesTab(); renderQuickAdds(); syncFastEntry();
+});
 
 // ---------- Overview ----------
 function categoryDetailHTML(catId, entries){
@@ -1121,7 +1198,7 @@ function categoryDetailHTML(catId, entries){
     </div>`).join('')}</div>`;
 }
 
-function monthSeries(entries){
+function monthSeries(entries,from=null,to=null){
   const months = Object.create(null);
   entries.forEach(e=>{
     const key = monthKey(e.date);
@@ -1129,9 +1206,10 @@ function monthSeries(entries){
     months[key].cents += Math.round(e.amount*100);
     months[key].count++;
   });
-  // Include this month even before its first entry, plus any missing months in the recorded range.
-  const keys = Object.keys(months).concat(monthKey(todayStr())).sort();
-  const first = keys[0], last = keys[keys.length-1];
+  // Keep gaps inside the selected range, without adding months beyond its endpoints.
+  const keys = Object.keys(months).sort();
+  const first = from ? monthKey(from) : keys[0] || monthKey(todayStr());
+  const last = to ? monthKey(to) : keys[keys.length-1] || first;
   const series = [];
   let cumulativeCents = 0;
   for(let key=first;key<=last;key=shiftMonth(key,1)){
@@ -1142,26 +1220,46 @@ function monthSeries(entries){
   return series;
 }
 
-function renderMonthlyTotals(){
-  document.getElementById('monthlyTotals').innerHTML = monthSeries(state.entries).reverse().map(data=>{
-    const key = data.key;
-    return `<button type="button" class="month-total" data-month="${key}" aria-current="${key===currentMonth}">
-      <span>${monthLabel(key)}</span><span class="amount">${fmt(data.cents/100)}</span>
-      <span class="count">${data.count} ${data.count===1?'entry':'entries'}</span>
-    </button>`;
-  }).join('');
-  document.getElementById('allTimeTotal').innerHTML = `<span>All months total</span><span>${fmt(sumMoney(state.entries))}</span>`;
-  document.querySelectorAll('#monthlyTotals [data-month]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      currentMonth = button.dataset.month;
-      expandedCategory = null;
-      renderOverview();
-      document.getElementById('overviewMonthLabel').scrollIntoView({block:'center'});
-    });
-  });
-}
-
 // ---------- Overall: the complete recorded history ----------
+function storyContext(){
+  const dates = state.entries.map(e=>e.date).sort();
+  const first = dates[0] || null, last = dates[dates.length-1] || null;
+  const start = storyRange.start || first, end = storyRange.end || last;
+  const entries = state.entries.filter(e=>(!start || e.date>=start) && (!end || e.date<=end));
+  return {start,end,entries,filtered:!!(storyRange.start || storyRange.end)};
+}
+function syncStoryRangeInputs(){
+  const context = storyContext();
+  document.getElementById('storyStart').value = context.start || '';
+  document.getElementById('storyEnd').value = context.end || '';
+}
+document.getElementById('storyRangeForm').addEventListener('submit',event=>{
+  event.preventDefault();
+  const start = document.getElementById('storyStart').value || null;
+  const end = document.getElementById('storyEnd').value || null;
+  const dates = state.entries.map(e=>e.date).sort();
+  const effectiveStart = start || dates[0], effectiveEnd = end || dates[dates.length-1];
+  const error = document.getElementById('storyRangeError');
+  if((start && !isValidDate(start)) || (end && !isValidDate(end)) || (effectiveStart && effectiveEnd && effectiveStart>effectiveEnd)){
+    error.textContent = 'Choose valid dates, with the start on or before the end.';
+    error.hidden = false;
+    return;
+  }
+  error.hidden = true;
+  storyRange = {start,end};
+  overallSelectedMonth = null;
+  overallExpandedCategory = null;
+  document.getElementById('storyRangePanel').open = false;
+  renderOverall();
+});
+document.getElementById('resetStoryRange').addEventListener('click',()=>{
+  storyRange = {start:null,end:null};
+  overallSelectedMonth = null;
+  overallExpandedCategory = null;
+  document.getElementById('storyRangeError').hidden = true;
+  document.getElementById('storyRangePanel').open = false;
+  renderOverall();
+});
 function trackingStreaks(entries){
   const dates = [...new Set(entries.map(e=>e.date).filter(date=>date<=todayStr()))].sort();
   let best = 0, run = 0, previous = null;
@@ -1181,16 +1279,19 @@ function trackingStreaks(entries){
 }
 
 function renderOverall(){
-  const entries = state.entries;
+  const context = storyContext();
+  const entries = context.entries;
   const total = sumMoney(entries);
-  const series = monthSeries(entries);
+  const series = monthSeries(entries,context.start,context.end);
   const loggedMonths = series.filter(m=>m.count>0);
   const dates = entries.map(e=>e.date).sort();
   const streaks = trackingStreaks(entries);
   const dateLabel = date=>new Date(date+'T12:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('storyRangeLabel').textContent = context.filtered ? 'Custom dates · tap to change' : 'Automatic · first to latest entry';
+  if(!document.getElementById('storyRangePanel').open) syncStoryRangeInputs();
   document.getElementById('overallSummary').innerHTML = `
-    <div class="label">All-time recorded spends</div><div class="value">${fmt(total)}</div>
-    <p class="overall-caption">${dates.length ? `${dateLabel(dates[0])} – ${dateLabel(dates[dates.length-1])}` : 'Your money story starts with your first entry.'}</p>
+    <div class="label">${context.filtered?'Spends in your chosen dates':'All-time recorded spends'}</div><div class="value">${fmt(total)}</div>
+    <p class="overall-caption">${context.start && context.end ? `${dateLabel(context.start)} – ${dateLabel(context.end)}` : 'Your money story starts with your first entry.'}</p>
     <div class="overall-stats">
       <div class="overall-stat"><strong>${loggedMonths.length}</strong><span>months with entries</span></div>
       <div class="overall-stat"><strong>${entries.length}</strong><span>expenses recorded</span></div>
@@ -1198,7 +1299,7 @@ function renderOverall(){
       <div class="overall-stat"><strong>${fmt(entries.length?total/entries.length:0)}</strong><span>average expense</span></div>
     </div>`;
 
-  if(!series.some(m=>m.key===overallSelectedMonth)) overallSelectedMonth = loggedMonths.at(-1)?.key || monthKey(todayStr());
+  if(!series.some(m=>m.key===overallSelectedMonth)) overallSelectedMonth = loggedMonths.at(-1)?.key || series[series.length-1]?.key;
   renderOverallChart(series,entries.length>0);
 
   const totals = Object.create(null);
@@ -1211,10 +1312,10 @@ function renderOverall(){
     const open = overallExpandedCategory===category;
     return `<button type="button" class="overall-category" data-overall-category="${escapeHTML(category)}" aria-expanded="${open}">
       <span class="name"><span class="dot" style="background:${catColor(category)}"></span>${escapeHTML(category)}</span>
-      <span class="amount">${fmt(amount)}</span><span class="share">${share.toFixed(1)}% of all recorded spends</span>
+      <span class="amount">${fmt(amount)}</span><span class="share">${share.toFixed(1)}% of ${context.filtered?'spends in this range':'all recorded spends'}</span>
       <span class="bar-track"><span class="bar-fill" style="display:block;width:${share}%;background:${catColor(category)}"></span></span>
     </button>${open?categoryDetailHTML(category,entries):''}`;
-  }).join('') : '<div class="empty">Your category story will appear after your first expense.</div>';
+  }).join('') : `<div class="empty">${context.filtered?'No expenses in these dates. Try a wider range.':'Your category story will appear after your first expense.'}</div>`;
   document.querySelectorAll('[data-overall-category]').forEach(button=>button.addEventListener('click',()=>{
     overallExpandedCategory = overallExpandedCategory===button.dataset.overallCategory ? null : button.dataset.overallCategory;
     renderOverall();
@@ -1222,7 +1323,8 @@ function renderOverall(){
 
   const top = categories[0];
   const personalities = {Food:'Flavour explorer',Transport:'City mover',Shopping:'Style curator',Fun:'Experience collector',Sports:'Active spirit',Donation:'Generous heart',Gift:'Thoughtful giver',Productive:'Builder mindset',Misc:'Life juggler'};
-  document.getElementById('moneyPersonality').innerHTML = top ? `<strong>${personalities[top] || 'Your own kind of spender'}</strong><p>Your largest recorded category is ${escapeHTML(top)}: ${fmt(totals[top]/100)} across all months. What moments are behind those numbers?</p>` : '<strong>A fresh chapter</strong><p>Record your first real expense to discover your spending story.</p>';
+  document.getElementById('moneyPersonality').innerHTML = top ? `<strong>${personalities[top] || 'Your own kind of spender'}</strong><p>Your largest recorded category is ${escapeHTML(top)}: ${fmt(totals[top]/100)} ${context.filtered?'in these dates':'across all months'}. What moments are behind those numbers?</p>` : `<strong>${context.filtered?'A quiet page':'A fresh chapter'}</strong><p>${context.filtered?'No entries in this range. Your other chapters are a date change away.':'Record your first real expense to discover your spending story.'}</p>`;
+  document.getElementById('trackingWinsTitle').textContent = context.filtered ? 'Your tracking wins · selected dates' : 'Your tracking wins';
   const milestone = [7,14,30,60,100].find(n=>n>streaks.days);
   const progress = milestone ? Math.min(100,streaks.days/milestone*100) : 100;
   document.getElementById('habitProgress').innerHTML = `<p class="overall-caption"><strong>${streaks.days} days journaled</strong> · ${milestone?`${milestone-streaks.days} more to the ${milestone}-day milestone`:'100-day milestone unlocked'}</p>
@@ -1235,7 +1337,6 @@ function renderOverall(){
     {name:'Pattern spotter',earned:categories.length>=3,detail:'Discover 3 spending categories.'}
   ];
   document.getElementById('trackingBadges').innerHTML = badges.map(b=>`<div class="habit-badge${b.earned?' earned':''}"><span class="badge-status">${b.earned?'Unlocked':'Next adventure'}</span><strong>${b.name}</strong><span>${b.detail}</span></div>`).join('');
-  renderSwapGame();
 }
 
 function axisMoney(n){
@@ -1250,7 +1351,7 @@ function renderOverallChart(series,hasEntries){
   const selected = series.find(m=>m.key===overallSelectedMonth) || series[series.length-1];
   const detail = document.getElementById('overallChartDetail');
   if(!hasEntries){
-    document.getElementById('overallChart').innerHTML = '<div class="empty">Add your first expense to bring this graph to life.</div>';
+    document.getElementById('overallChart').innerHTML = `<div class="empty">${storyContext().filtered?'No expenses in this range. Try widening the dates.':'Add your first expense to bring this graph to life.'}</div>`;
     detail.innerHTML = '<p>Each bar will represent one month of recorded expenses.</p>';
     return;
   }
@@ -1278,7 +1379,7 @@ function renderOverallChart(series,hasEntries){
     </g>`;
   }).join('');
   document.getElementById('overallChart').innerHTML = `<svg class="spend-chart" style="${series.length>6?`min-width:${width}px`:''}" viewBox="0 0 ${width} ${height}" role="group" aria-label="${overallGraphMode==='cumulative'?'Cumulative':'Monthly'} recorded spending graph">${lines}${bars}</svg>`;
-  detail.innerHTML = `<div><strong>${monthLabel(selected.key)} · ${fmt(overallGraphMode==='cumulative'?selected.cumulative:selected.total)}</strong><p>${overallGraphMode==='cumulative'?'Recorded running total through this month. ':''}${selected.count} ${selected.count===1?'expense':'expenses'} logged in this month.</p></div><button type="button" class="btn secondary small" id="openOverallMonth">Open month</button>`;
+  detail.innerHTML = `<div><strong>${monthLabel(selected.key)} · ${fmt(overallGraphMode==='cumulative'?selected.cumulative:selected.total)}</strong><p>${overallGraphMode==='cumulative'?'Recorded running total through this month. ':''}${selected.count} ${selected.count===1?'expense':'expenses'} ${storyContext().filtered?'within your chosen dates.':'logged in this month.'}</p></div><button type="button" class="btn secondary small" id="openOverallMonth">${storyContext().filtered?'Open full month':'Open month'}</button>`;
   const container=document.getElementById('overallChart');
   container.querySelectorAll('[data-chart-month]').forEach(bar=>{
     bar.addEventListener('click',()=>{
@@ -1300,12 +1401,6 @@ function renderOverallChart(series,hasEntries){
   });
 }
 
-function renderSwapGame(){
-  const amount=Number(document.getElementById('dailySwap').value);
-  document.getElementById('dailySwapValue').textContent=fmt(amount);
-  document.getElementById('swapResult').innerHTML=`<div><strong>${fmt(amount*30)}</strong><span>over 30 days</span></div><div><strong>${fmt(amount*365)}</strong><span>over 365 days</span></div>`;
-}
-document.getElementById('dailySwap').addEventListener('input',renderSwapGame);
 document.querySelectorAll('[data-graph-mode]').forEach(button=>button.addEventListener('click',()=>{
   overallGraphMode=button.dataset.graphMode;
   renderOverall();
@@ -1319,7 +1414,8 @@ new ResizeObserver(observations=>{
   const width = Math.round(observations[0].contentRect.width);
   if(width>0 && width!==observedChartWidth){
     observedChartWidth = width;
-    renderOverallChart(monthSeries(state.entries),state.entries.length>0);
+    const context = storyContext();
+    renderOverallChart(monthSeries(context.entries,context.start,context.end),context.entries.length>0);
   }
 }).observe(document.getElementById('overallChart'));
 
@@ -1428,7 +1524,6 @@ function renderOverview(){
   renderInsights(entries, total, prevMonthKey);
   renderHeatmap(entries, y, m);
   renderReminderBanner();
-  renderMonthlyTotals();
   renderOverall();
 }
 
@@ -1584,6 +1679,8 @@ document.getElementById('entryForm').addEventListener('submit', (ev)=>{
   if(!saveState(nextState)){ fail(storageError || 'Your change could not be saved. Your form has been kept.'); return; }
   document.getElementById('lastAdded').textContent = `${editId?'Updated':'Added'}: ${fmt(amount)} · ${category} · ${date}`;
   if(editId) exitEditMode();
+  undoEntry = editId ? null : {key:STORAGE_KEY,id:nextState.entries[nextState.entries.length-1].id};
+  document.getElementById('undoLastAdd').hidden = !undoEntry;
   document.getElementById('fSplitTotal').required = false;
   document.getElementById('fSplitCount').required = false;
   document.getElementById('fDate').value = date;
@@ -1594,9 +1691,10 @@ document.getElementById('entryForm').addEventListener('submit', (ev)=>{
   document.getElementById('fSplitTotal').value = '';
   document.getElementById('fSplitCount').value = '';
   document.getElementById('splitWrap').style.display = 'none';
-  document.getElementById('fCustomCategory').value = '';
-  document.getElementById('customCategoryWrap').style.display = 'none';
-  document.getElementById('fCategory').value = rawCategory === '__other__' ? 'Food' : rawCategory;
+  document.getElementById('fCustomCategory').value = rawCategory==='__other__' ? customCategory : '';
+  document.getElementById('customCategoryWrap').style.display = rawCategory==='__other__' ? 'block' : 'none';
+  document.getElementById('fCategory').value = rawCategory;
+  document.getElementById('entryDetails').open = false;
   document.getElementById('fAmount').focus();
   currentMonth = monthKey(date);
   expandedCategory = null;
@@ -1605,6 +1703,7 @@ document.getElementById('entryForm').addEventListener('submit', (ev)=>{
   renderOverview();
   renderEntriesTab();
   renderQuickAdds();
+  syncFastEntry();
 });
 
 document.getElementById('fSplitToggle').addEventListener('change', (e)=>{
@@ -1618,6 +1717,7 @@ function recomputeSplitAmount(){
   const count = Number(document.getElementById('fSplitCount').value);
   if(total>0 && Number.isInteger(count) && count>=2){
     document.getElementById('fAmount').value = roundMoney(total/count);
+    syncFastEntry();
   }
 }
 document.getElementById('fSplitTotal').addEventListener('input', recomputeSplitAmount);
@@ -1628,7 +1728,7 @@ function exitEditMode(){
   document.getElementById('entryError').hidden = true;
   document.getElementById('editId').value = '';
   document.getElementById('addFormTitle').textContent = 'Add a spend';
-  document.getElementById('submitBtn').textContent = 'Add spend';
+  document.getElementById('submitBtn').textContent = 'Save expense';
   document.getElementById('cancelEdit').style.display = 'none';
   document.getElementById('fDate').value = todayStr();
   document.getElementById('fAmount').value = '';
@@ -1643,6 +1743,9 @@ function exitEditMode(){
   document.getElementById('fCustomCategory').value = '';
   document.getElementById('customCategoryWrap').style.display = 'none';
   document.getElementById('fCategory').value = 'Food';
+  document.getElementById('entryDetails').open = false;
+  syncFastEntry();
+  renderQuickAdds();
 }
 
 function editEntry(id){
@@ -1665,6 +1768,7 @@ function editEntry(id){
   document.getElementById('splitWrap').style.display = hasSplit ? 'block' : 'none';
   document.getElementById('fSplitTotal').value = hasSplit ? e.splitTotal : '';
   document.getElementById('fSplitCount').value = hasSplit ? e.splitCount : '';
+  document.getElementById('entryDetails').open = hasSplit || !!e.tags?.length;
   document.getElementById('addFormTitle').textContent = 'Edit spend';
   document.getElementById('submitBtn').textContent = 'Save changes';
   document.getElementById('cancelEdit').style.display = 'inline-block';
@@ -1672,12 +1776,17 @@ function editEntry(id){
   document.querySelectorAll('.view').forEach(t=>t.classList.remove('active'));
   document.querySelector('.tab-btn[data-tab="add"]').classList.add('active');
   document.getElementById('tab-add').classList.add('active');
+  undoEntry = null;
+  document.getElementById('undoLastAdd').hidden = true;
+  syncFastEntry();
+  renderQuickAdds();
 }
 
 function deleteEntry(id){
   if(!requireProfile()) return;
   if(!confirm('Delete this entry?')) return;
   if(!saveState({...state, entries:state.entries.filter(e=>e.id!==id)})) return;
+  if(undoEntry?.id===id){ undoEntry=null; document.getElementById('undoLastAdd').hidden=true; }
   renderEntriesTab();
   renderOverview();
   renderQuickAdds();
@@ -1835,34 +1944,38 @@ document.getElementById('importFile').addEventListener('change', (e)=>{
 let quickAddData = [];
 function renderQuickAdds(){
   const el = document.getElementById('quickAdds');
-  if(!currentProfile){ el.innerHTML = ''; return; }
+  if(!currentProfile || document.getElementById('editId').value){ el.innerHTML = ''; return; }
   const combos = Object.create(null);
   state.entries.forEach(e=>{
-    if(!e.note) return;
     const key = e.category + '|' + e.note;
     if(!combos[key]) combos[key] = { count:0, category:e.category, note:e.note, amount:e.amount, date:e.date };
     combos[key].count++;
     if(e.date >= combos[key].date){ combos[key].amount = e.amount; combos[key].date = e.date; }
   });
-  quickAddData = Object.values(combos).filter(c=>c.count>=2).sort((a,b)=>b.count-a.count).slice(0,5);
+  quickAddData = Object.values(combos).sort((a,b)=>b.count-a.count || b.date.localeCompare(a.date)).slice(0,4);
   if(!quickAddData.length){ el.innerHTML = ''; return; }
-  el.innerHTML = '<div class="quick-adds">' + quickAddData.map((t,i)=>
-    `<button type="button" class="quick-add-btn" onclick="quickAdd(${i})">${escapeHTML(t.note)} · ${fmt(t.amount)}</button>`
+  el.innerHTML = '<p class="repeat-heading">Tap to repeat a recent expense · uses the date below</p><div class="quick-adds">' + quickAddData.map((t,i)=>
+    `<button type="button" class="quick-add-btn" onclick="quickAdd(${i})">${CATEGORY_ICONS[t.category] || '📌'} ${escapeHTML(t.note || t.category)} · ${fmt(t.amount)}</button>`
   ).join('') + '</div>';
 }
 function quickAdd(i){
   if(!requireProfile()) return;
   const t = quickAddData[i];
   if(!t) return;
+  if(performance.now()-lastRepeatAt<600) return;
   const id = state.nextId;
   const date = document.getElementById('fDate').value || todayStr();
   if(!isValidDate(date)) return;
   if(!saveState({...state,nextId:id+1,entries:[...state.entries,{id, date, amount:t.amount, category:t.category, note:t.note,tags:[]}]})) return;
+  lastRepeatAt = performance.now();
+  undoEntry = {key:STORAGE_KEY,id};
+  document.getElementById('undoLastAdd').hidden = false;
   currentMonth = monthKey(date);
   document.getElementById('lastAdded').textContent = `Added: ${fmt(t.amount)} · ${t.category} · ${date}`;
   renderOverview();
   renderQuickAdds();
   renderEntriesTab();
+  syncFastEntry();
 }
 
 // ---------- init ----------
@@ -1872,6 +1985,7 @@ function bootApp(){
   renderOverview();
   renderEntriesTab();
   renderQuickAdds();
+  syncFastEntry();
 }
 
 (function tryResumeSession(){
