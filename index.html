@@ -171,6 +171,16 @@
   .overall-intro{margin-bottom:18px;}
   .overall-intro h2{font:600 25px "Fraunces",Georgia,serif; margin:0 0 6px;}
   .overall-intro p,.overall-caption{font-size:13px; line-height:1.5; color:var(--muted); margin:6px 0 0;}
+  #insightsList{display:grid; gap:12px;}
+  .insight-card{min-width:0; padding:14px; border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:9px; background:var(--panel2);}
+  .insight-card h4{margin:0 0 10px; font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.04em;}
+  .insight-main{margin:0 0 12px; font-size:17px; font-weight:600; line-height:1.45; color:var(--text); overflow-wrap:anywhere;}
+  .insight-main .insight-amount{display:block; margin-top:4px; font-family:"IBM Plex Mono",monospace; font-size:20px; color:var(--accent);}
+  .insight-facts{display:grid; gap:8px; margin:0;}
+  .insight-facts > div{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; font-size:12px; line-height:1.5;}
+  .insight-facts dt{color:var(--muted); overflow-wrap:anywhere;}
+  .insight-facts dd{margin:0; color:var(--text); text-align:right; font-weight:500; overflow-wrap:anywhere;}
+  .insight-context{margin:12px 0 0; padding-top:10px; border-top:1px solid var(--border); font-size:12px; line-height:1.5; color:var(--muted);}
   .overall-hero{border-top:3px solid var(--accent);}
   .overall-hero .value{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:clamp(25px,7vw,36px); color:var(--accent); overflow-wrap:anywhere;}
   .overall-hero .label{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;}
@@ -659,7 +669,7 @@
 </div>
 
 <script>
-const APP_RELEASE = 'spend-tracker-v4-2026-11-24-quick-add';
+const APP_RELEASE = 'spend-tracker-v5-2026-11-24-insights';
 if('serviceWorker' in navigator){
   const wasControlled = !!navigator.serviceWorker.controller;
   window.addEventListener('load', ()=>{
@@ -1529,32 +1539,51 @@ function renderOverview(){
 
 function renderInsights(entries, total, prevMonthKey){
   const panel = document.getElementById('insightsPanel');
-  if(!entries.length){ panel.style.display = 'none'; return; }
+  if(!entries.length){ panel.style.display = 'none'; document.getElementById('insightsList').innerHTML = ''; return; }
   const insights = [];
   const byCat = Object.create(null);
   entries.forEach(e=>{ byCat[e.category] = (byCat[e.category]||0) + e.amount; });
   const topCat = Object.keys(byCat).sort((a,b)=>byCat[b]-byCat[a])[0];
-  const topPct = Math.round(byCat[topCat]/total*100);
-  insights.push(`<b>${escapeHTML(topCat)}</b> is your biggest category this month at <b>${topPct}%</b> of total spend (${fmt(byCat[topCat])}).`);
+  const topPct = total>0 ? Math.round(byCat[topCat]/total*100) : 0;
+  insights.push(`<section class="insight-card" aria-labelledby="insight-category-title">
+    <h4 id="insight-category-title">Top spending category</h4>
+    <p class="insight-main">${escapeHTML(topCat)}<span class="insight-amount">${fmt(byCat[topCat])}</span></p>
+    <dl class="insight-facts"><div><dt>Share of monthly spend</dt><dd>${topPct}%</dd></div></dl>
+  </section>`);
 
   const prevEntries = entriesForMonth(prevMonthKey);
   if(prevEntries.length){
     const prevTotal = sumMoney(prevEntries);
     if(prevTotal>0){
       const pct = Math.round((total-prevTotal)/prevTotal*100);
-      if(Math.abs(pct)>=1) insights.push(`You're at <b>${fmt(total)}</b> so far — ${pct>0?`${pct}% more`:`${Math.abs(pct)}% less`} than ${monthLabel(prevMonthKey)}'s ${fmt(prevTotal)}.`);
+      if(Math.abs(pct)>=1) insights.push(`<section class="insight-card" aria-labelledby="insight-comparison-title">
+        <h4 id="insight-comparison-title">Monthly comparison</h4>
+        <p class="insight-main">${Math.abs(pct).toLocaleString('en-IN')}% ${pct>0?'higher':'lower'} recorded spend</p>
+        <dl class="insight-facts">
+          <div><dt>${monthLabel(currentMonth)}${currentMonth===monthKey(todayStr())?' · so far':''}</dt><dd>${fmt(total)}</dd></div>
+          <div><dt>${monthLabel(prevMonthKey)}</dt><dd>${fmt(prevTotal)}</dd></div>
+        </dl>
+        <p class="insight-context">${currentMonth===monthKey(todayStr())?'Month to date compared with the previous month’s full recorded total.':'Comparison of the recorded totals for these two months.'}</p>
+      </section>`);
     }
   }
 
   const biggest = [...entries].sort((a,b)=>b.amount-a.amount)[0];
   if(biggest){
     const label = biggest.note || biggest.category;
-    const dateStr = new Date(biggest.date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'});
-    insights.push(`Biggest single expense: <b>${fmt(biggest.amount)}</b> on ${escapeHTML(label)} (${dateStr}).`);
+    const dateStr = new Date(biggest.date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    insights.push(`<section class="insight-card" aria-labelledby="insight-expense-title">
+      <h4 id="insight-expense-title">Largest single expense</h4>
+      <p class="insight-main">${escapeHTML(label)}<span class="insight-amount">${fmt(biggest.amount)}</span></p>
+      <dl class="insight-facts">
+        <div><dt>Date</dt><dd>${dateStr}</dd></div>
+        <div><dt>Category</dt><dd>${escapeHTML(biggest.category)}</dd></div>
+      </dl>
+    </section>`);
   }
 
   panel.style.display = 'block';
-  document.getElementById('insightsList').innerHTML = insights.map(t=>`<div class="insight-card">${t}</div>`).join('');
+  document.getElementById('insightsList').innerHTML = insights.join('');
 }
 
 function renderHeatmap(entries, y, m){
